@@ -65,7 +65,7 @@ export function PageHero({
         backgroundClassName
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.16),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(215,255,99,0.07),transparent_55%)]" />
       <div className="pointer-events-none absolute -left-20 top-16 h-56 w-56 rounded-full bg-vj-accent/10 blur-3xl" />
       <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-vj-accent/5 blur-3xl" />
 

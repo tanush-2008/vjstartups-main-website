@@ -63,7 +63,7 @@ export function JoinClubSection({ onApplyNow }: JoinClubSectionProps) {
               <div className="absolute left-3 top-3 bottom-3 w-px bg-vj-border" aria-hidden="true" />
               {steps.map((step, index) => (
                 <div key={step.title} className="relative flex items-start gap-4 pl-1">
-                  <div className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-vj-accent text-xs font-bold text-white">
+                  <div className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-vj-accent text-xs font-bold text-vj-accent-foreground">
                     {index + 1}
                   </div>
                   <div>

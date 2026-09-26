@@ -1,7 +1,7 @@
 /* Landing styles, originally generated from swsh-clone/app/globals.css with every selector scoped under .vj-landing. Edit here directly. */
 .vj-landing{position:relative;isolation:isolate;line-height:normal}
 html.lenis{scroll-behavior:auto}
-.vj-landing :where(h1,h2,h3,h4,h5,h6){font-size:revert;font-weight:revert;margin:revert;color:inherit}
+.vj-landing :where(h1,h2,h3,h4,h5,h6){font-size:revert;font-weight:revert;margin:revert;color:inherit;letter-spacing:revert;line-height:inherit}
 .vj-landing :where(p,figure,blockquote,dl,dd){margin:revert}
 .vj-landing :where(svg){display:revert;vertical-align:revert}
 .vj-landing{--ink:#070707;--paper:#f0eee8;--white:#f7f5ef;--pink:#ff4aa7;--lime:#d7ff63;--violet:#9c88ff;--line:rgba(255,255,255,.1);--dark-line:rgba(0,0,0,.11);--sans:'Manrope',sans-serif;--mono:'DM Mono',monospace;--tx:0px;--ty:0px;--hx:0px;--hy:0px;--cx:50vw;--cy:50vh;--cursor-active:0}

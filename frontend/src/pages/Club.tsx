@@ -12,7 +12,7 @@ import { JoinClubSection } from "@/components/club/JoinClubSection";
 import { cn } from "@/lib/utils";
 
 const tabTriggerClass =
-  "min-h-[44px] flex-1 gap-2 rounded-vj-button px-3 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-vj-accent data-[state=active]:text-white data-[state=active]:shadow-[var(--vj-shadow-subtle)]";
+  "min-h-[44px] flex-1 gap-2 rounded-vj-button px-3 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-vj-accent data-[state=active]:text-vj-accent-foreground data-[state=active]:shadow-[var(--vj-shadow-subtle)]";
 
 const ClubPage = () => {
   const [activeTab, setActiveTab] = useState<string>("overview");
