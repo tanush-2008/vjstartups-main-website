@@ -487,7 +487,7 @@ export default function IdeaDetail() {
             <Link 
               to={`/problems/${problem.problemId}`}
               target="_blank"
-              className="text-lg font-semibold text-green-600 dark:text-green-400 hover:underline inline-flex items-center"
+              className="text-lg font-semibold text-idea-primary hover:underline inline-flex items-center"
             >
               View Problem : {problem.title}
               <svg 
@@ -549,7 +549,7 @@ export default function IdeaDetail() {
               </h3>
               <div className="space-y-4 text-vj-muted">
                 <p>
-                  {idea.targetCustomers || "Our primary target customers are students, faculty, and staff members who are actively seeking innovative solutions to improve their campus experience and academic performance."}
+                  {idea.targetCustomers || <span className="italic">Not specified yet.</span>}
                 </p>
                 {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <div className="p-3 bg-idea-light/50 rounded-lg">
@@ -571,7 +571,7 @@ export default function IdeaDetail() {
                 {canEdit && (
                   <Dialog open={showAddAttachment} onOpenChange={setShowAddAttachment}>
                     <DialogTrigger asChild>
-                      <Button size="sm" className="bg-idea-primary hover:bg-idea-primary/90 text-white">
+                      <Button size="sm" className="bg-idea-primary hover:bg-idea-primary/90 text-black font-extrabold">
                         <Plus className="w-4 h-4 mr-1" />
                         Add File
                       </Button>
@@ -675,7 +675,7 @@ export default function IdeaDetail() {
                 {canEdit && (
                   <Dialog open={showAddLink} onOpenChange={setShowAddLink}>
                     <DialogTrigger asChild>
-                      <Button size="sm" className="bg-idea-primary hover:bg-idea-primary/90 text-white">
+                      <Button size="sm" className="bg-idea-primary hover:bg-idea-primary/90 text-black font-extrabold">
                         <Plus className="w-4 h-4 mr-1" />
                         Add Link
                       </Button>
@@ -833,7 +833,7 @@ export default function IdeaDetail() {
                   ))}
                 </div>
                 <div className="mt-4 space-y-2">
-                  <Button className="w-full bg-idea-primary hover:bg-idea-primary/90 text-white">
+                  <Button className="w-full bg-idea-primary hover:bg-idea-primary/90 text-black font-extrabold">
                     <Mail className="mr-2 h-4 w-4" />
                     Contact Team
                   </Button>
