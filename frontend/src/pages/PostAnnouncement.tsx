@@ -26,7 +26,7 @@ const PostAnnouncement = () => {
           <p className="text-zinc-400 mb-6">
             You need admin or wing master privileges to post announcements.
           </p>
-          <Button onClick={() => navigate('/')} className="bg-purple-600 hover:bg-purple-700">
+          <Button onClick={() => navigate('/')}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Go Home
           </Button>
@@ -157,7 +157,7 @@ const PostAnnouncement = () => {
               </Button>
               <Button
                 type="submit"
-                className="w-full sm:flex-1 bg-purple-600 hover:bg-purple-700 text-white min-h-[44px] order-1 sm:order-2"
+                className="w-full sm:flex-1 min-h-[44px] order-1 sm:order-2"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
