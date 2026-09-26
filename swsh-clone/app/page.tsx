@@ -284,7 +284,7 @@ function Hero() {
   },[]);
 
   return (
-    <section className="opening" ref={outer} id="top">
+    <section className="opening" data-tone="ink" ref={outer} id="top">
       <div className="hero-v12 opening-sticky" ref={sticky}>
       <div className="hero-v12-top">
         <span>VJ STARTUPS / HYDERABAD</span>
@@ -328,7 +328,7 @@ function Hero() {
 
       <div className="hero-v12-intro">
         <p>Start with what is broken.<br/>Follow the evidence.<br/>Build until reality says yes.</p>
-        <Magnetic href="#start" dark><span>Find where you are</span><Arrow dark/></Magnetic>
+        <Magnetic href="#start"><span>Find where you are</span><Arrow/></Magnetic>
       </div>
 
       <div className="hero-v12-side hero-side-left">00 — QUESTION</div>
@@ -375,7 +375,7 @@ function Morph() {
     return()=>cancelAnimationFrame(raf);
   },[]);
   const wordsList=["PROBLEM","EVIDENCE","BUILD","IMPACT"];
-  return <section className="morph-v13 light" ref={ref}>
+  return <section className="morph-v13 light" data-tone="paper" ref={ref}>
     <div className="morph-v13-sticky">
       <div className="morph-v13-top"><span>01 / FLUID → FORM</span><span>AN IDEA HAS NO SHAPE.</span></div>
       <div className="morph-v13-intro"><span className="chapter-label dark">FROM A THOUGHT</span><h2>MAKE IT<br/><i>REAL.</i></h2></div>
@@ -395,15 +395,15 @@ function Starting() {
     ["I HAVE A PROTOTYPE","Put it in the world.","Use the journey to validate the product, collect evidence, and iterate."],
     ["I HAVE TRACTION","Make it repeatable.","StartupHub is where evidence becomes systems, networks, and growth."],
   ];
-  return <section className="starting light" id="start"><Reveal className="starting-head"><span className="chapter-label dark">01A / ORIENTATION</span><h2>WHERE ARE<br/><i>YOU NOW?</i></h2><p>Don't follow a template. Start from the truth of what you already have.</p></Reveal><div className="starting-panel" data-reveal><div className="starting-tabs">{items.map(([label],i)=><button key={label} className={i===active?"active":""} onClick={()=>setActive(i)}><small>0{i+1}</small>{label}</button>)}</div><div className="starting-response"><span className="response-no">0{active+1}</span><span className="kicker dark">YOUR NEXT MOVE</span><h3>{items[active][1]}</h3><p>{items[active][2]}</p><Magnetic href="#journey"><span>Enter the journey</span><Arrow/></Magnetic></div></div></section>;
+  return <section className="starting light" data-tone="paper" id="start"><Reveal className="starting-head"><span className="chapter-label dark">01A / ORIENTATION</span><h2>WHERE ARE<br/><i>YOU NOW?</i></h2><p>Don't follow a template. Start from the truth of what you already have.</p></Reveal><div className="starting-panel" data-reveal><div className="starting-tabs">{items.map(([label],i)=><button key={label} className={i===active?"active":""} onClick={()=>setActive(i)}><small>0{i+1}</small>{label}</button>)}</div><div className="starting-response"><span className="response-no">0{active+1}</span><span className="kicker dark">YOUR NEXT MOVE</span><h3>{items[active][1]}</h3><p>{items[active][2]}</p><Magnetic href="#journey"><span>Enter the journey</span><Arrow/></Magnetic></div></div></section>;
 }
 
 function Journey() {
   const ref=useRef<HTMLElement>(null), [index,setIndex]=useState(0),[percent,setPercent]=useState(0);
-  useEffect(()=>{let raf=0;const tick=()=>{const el=ref.current;if(!el){raf=requestAnimationFrame(tick);return}const r=el.getBoundingClientRect();const total=Math.max(el.offsetHeight-window.innerHeight,1);const p=Math.min(Math.max(-r.top/total,0),1);setPercent(p);setIndex(Math.min(STAGES.length-1,Math.floor(p*STAGES.length)));raf=requestAnimationFrame(tick)};raf=requestAnimationFrame(tick);return()=>cancelAnimationFrame(raf)},[]);
+  useEffect(()=>{let raf=0;const tick=()=>{const el=ref.current;if(!el){raf=requestAnimationFrame(tick);return}const r=el.getBoundingClientRect();const total=Math.max(el.offsetHeight-window.innerHeight,1);const p=Math.min(Math.max(-r.top/total,0),1);setPercent(Math.round(p*100));setIndex(Math.min(STAGES.length-1,Math.floor(p*STAGES.length)));raf=requestAnimationFrame(tick)};raf=requestAnimationFrame(tick);return()=>cancelAnimationFrame(raf)},[]);
   const go=(i:number)=>{const el=ref.current;if(!el)return;const top=el.getBoundingClientRect().top+window.scrollY;const travel=el.offsetHeight-window.innerHeight;window.scrollTo({top:top+travel*((i+.5)/STAGES.length),behavior:"smooth"})};
   const s=STAGES[index];
-  return <section className="journey" id="journey" ref={ref}><div className="journey-sticky"><div className="journey-top"><span>02 / THE JOURNEY</span><span>{s[0]} / 07</span></div><div className="journey-copy"><span className="stage-kicker">{s[1]}</span><span className="stage-number">{s[0]}</span><h2>{s[2]}</h2><p>{s[3]}</p><a href="#contact">Keep building <Arrow/></a></div><div className="journey-image">{STAGES.map((x,i)=><img key={x[0]} src={x[4]} alt="" className={i===index?"active":""}/>) }<div className="journey-shade"/><div className="journey-image-meta"><span>VIRTUAL STARTUP JOURNEY</span><span>{Math.round(percent*100)}%</span></div></div><div className="journey-dots">{STAGES.map((x,i)=><button key={x[0]} className={i===index?"active":""} onClick={()=>go(i)}>{x[0]}<i/></button>)}</div></div></section>;
+  return <section className="journey" data-tone="ink" id="journey" ref={ref}><div className="journey-sticky"><div className="journey-top"><span>02 / THE JOURNEY</span><span>{s[0]} / 07</span></div><div className="journey-copy"><span className="stage-kicker">{s[1]}</span><span className="stage-number">{s[0]}</span><h2>{s[2]}</h2><p>{s[3]}</p><a href="#contact">Keep building <Arrow/></a></div><div className="journey-image">{STAGES.map((x,i)=><img key={x[0]} src={x[4]} alt="" className={i===index?"active":""}/>) }<div className="journey-shade"/><div className="journey-image-meta"><span>VIRTUAL STARTUP JOURNEY</span><span>{percent}%</span></div></div><div className="journey-dots">{STAGES.map((x,i)=><button key={x[0]} className={i===index?"active":""} onClick={()=>go(i)}>{x[0]}<i/></button>)}</div></div></section>;
 }
 
 function Sphere() {
@@ -452,7 +452,7 @@ function Sphere() {
     raf=requestAnimationFrame(tick);
     return()=>{window.removeEventListener("pointermove",move);cancelAnimationFrame(raf)};
   },[]);
-  return <section className="sphere" ref={ref}>
+  return <section className="sphere" data-tone="ink" ref={ref}>
     <div className="sphere-sticky">
       <div className="sphere-top"><span>03 / THREE LENSES</span><span>SCROLL — THE SYSTEM ROTATES WITH YOU</span></div>
       <div className="sphere-background" ref={bg}>
@@ -488,15 +488,15 @@ function Sphere() {
   </section>;
 }
 function Hubs() {
-  const [active,setActive]=useState(0);return <section className="hubs light"><Reveal className="hubs-head"><span className="chapter-label dark">04 / ENTRY POINTS</span><h2>THREE DOORS.<br/><i>ONE SYSTEM.</i></h2><p>Different starts. Same underlying journey from problem to proof.</p></Reveal><div className="hub-layout" data-reveal><div className="hub-list">{HUBS.map((h,i)=><button key={h[0]} className={i===active?"active":""} onMouseEnter={()=>setActive(i)} onClick={()=>setActive(i)}><span>0{i+1}</span><div><small>{h[1]}</small><b>{h[0]}</b></div><Arrow/></button>)}</div><div className="hub-view">{HUBS.map((h,i)=><img key={h[0]} src={h[3]} alt="" className={i===active?"active":""}/>)}<div><span>{HUBS[active][1]}</span><h3>{HUBS[active][2]}</h3></div></div></div></section>;
+  const [active,setActive]=useState(0);return <section className="hubs light" data-tone="paper"><Reveal className="hubs-head"><span className="chapter-label dark">04 / ENTRY POINTS</span><h2>THREE DOORS.<br/><i>ONE SYSTEM.</i></h2><p>Different starts. Same underlying journey from problem to proof.</p></Reveal><div className="hub-layout" data-reveal><div className="hub-list">{HUBS.map((h,i)=><button key={h[0]} className={i===active?"active":""} onMouseEnter={()=>setActive(i)} onClick={()=>setActive(i)}><span>0{i+1}</span><div><small>{h[1]}</small><b>{h[0]}</b></div><Arrow/></button>)}</div><div className="hub-view">{HUBS.map((h,i)=><img key={h[0]} src={h[3]} alt="" className={i===active?"active":""}/>)}<div><span>{HUBS[active][1]}</span><h3>{HUBS[active][2]}</h3></div></div></div></section>;
 }
 
 function WorkField() {
-  const ref=useRef<HTMLDivElement>(null);useEffect(()=>{const el=ref.current;if(!el)return;const ns=Array.from(el.querySelectorAll<HTMLElement>("[data-depth]"));const move=(e:PointerEvent)=>{const r=el.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;ns.forEach(n=>{const d=Number(n.dataset.depth||0);n.style.transform=`translate3d(${x*d}px,${y*d}px,0) rotate(${x*d*.03}deg)`})};const leave=()=>ns.forEach(n=>n.style.transform="translate3d(0,0,0)");el.addEventListener("pointermove",move);el.addEventListener("pointerleave",leave);return()=>{el.removeEventListener("pointermove",move);el.removeEventListener("pointerleave",leave)}},[]);return <section className="work-field light" ref={ref}><div className="work-top"><span>05 / THE WORK</span><span>THE MESSY MIDDLE</span></div><div className="work-word">BUILD</div><div className="work-pic wp-a" data-depth="52"><img src={IMG.prototype} alt=""/></div><div className="work-pic wp-b" data-depth="-36"><img src={IMG.research} alt=""/></div><div className="work-pic wp-c" data-depth="25"><img src={IMG.pitch} alt=""/></div><div className="work-pic wp-d" data-depth="-49"><img src={IMG.founders} alt=""/></div><span className="work-note wn-a" data-depth="25">question → evidence</span><span className="work-note wn-b" data-depth="-18">prototype / 04</span><span className="work-note wn-c" data-depth="33">iteration / 07</span><div className="work-rule"/><div className="work-caption"><span>THE THING THAT LOOKS LIKE A STARTUP<br/>IS USUALLY A COLLECTION OF ITERATIONS.</span><span>VJ / WORK LOG</span></div></section>;
+  const ref=useRef<HTMLDivElement>(null);useEffect(()=>{const el=ref.current;if(!el)return;const ns=Array.from(el.querySelectorAll<HTMLElement>("[data-depth]"));const move=(e:PointerEvent)=>{const r=el.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;ns.forEach(n=>{const d=Number(n.dataset.depth||0);n.style.transform=`translate3d(${x*d}px,${y*d}px,0) rotate(${x*d*.03}deg)`})};const leave=()=>ns.forEach(n=>n.style.transform="translate3d(0,0,0)");el.addEventListener("pointermove",move);el.addEventListener("pointerleave",leave);return()=>{el.removeEventListener("pointermove",move);el.removeEventListener("pointerleave",leave)}},[]);return <section className="work-field light" data-tone="paper" ref={ref}><div className="work-top"><span>05 / THE WORK</span><span>THE MESSY MIDDLE</span></div><div className="work-word">BUILD</div><div className="work-pic wp-a" data-depth="52"><img src={IMG.prototype} alt=""/></div><div className="work-pic wp-b" data-depth="-36"><img src={IMG.research} alt=""/></div><div className="work-pic wp-c" data-depth="25"><img src={IMG.pitch} alt=""/></div><div className="work-pic wp-d" data-depth="-49"><img src={IMG.founders} alt=""/></div><span className="work-note wn-a" data-depth="25">question → evidence</span><span className="work-note wn-b" data-depth="-18">prototype / 04</span><span className="work-note wn-c" data-depth="33">iteration / 07</span><div className="work-rule"/><div className="work-caption"><span>THE THING THAT LOOKS LIKE A STARTUP<br/>IS USUALLY A COLLECTION OF ITERATIONS.</span><span>VJ / WORK LOG</span></div></section>;
 }
 
 function Ventures() {
-  const [active,setActive]=useState(0), v=VENTURES[active];return <section className="ventures light" id="ventures"><Reveal className="ventures-head"><span className="chapter-label dark">06 / PROOF</span><h2>IDEAS THAT<br/><i>MOVED.</i></h2><p>Selected ventures and technologies already moving through the ecosystem.</p></Reveal><div className="venture-stage" data-reveal><div className="venture-menu">{VENTURES.map((x,i)=><button key={x[0]} className={i===active?"active":""} onClick={()=>setActive(i)}><span>{x[0]}</span><div><small>{x[1]}</small><b>{x[2]}</b></div><Arrow/></button>)}</div><div className="venture-image"><img src={v[4]} alt="" key={v[0]}/><div><span>{v[1]}</span><span>{v[0]} / 03</span></div></div><div className="venture-copy"><span className="kicker dark">{v[1]}</span><h3>{v[2]}</h3><p>{v[3]}</p><a href="#contact">Explore the build <Arrow/></a></div></div></section>;
+  const [active,setActive]=useState(0), v=VENTURES[active];return <section className="ventures light" data-tone="paper" id="ventures"><Reveal className="ventures-head"><span className="chapter-label dark">06 / PROOF</span><h2>IDEAS THAT<br/><i>MOVED.</i></h2><p>Selected ventures and technologies already moving through the ecosystem.</p></Reveal><div className="venture-stage" data-reveal><div className="venture-menu">{VENTURES.map((x,i)=><button key={x[0]} className={i===active?"active":""} onClick={()=>setActive(i)}><span>{x[0]}</span><div><small>{x[1]}</small><b>{x[2]}</b></div><Arrow/></button>)}</div><div className="venture-image"><img src={v[4]} alt="" key={v[0]}/><div><span>{v[1]}</span><span>{v[0]} / 03</span></div></div><div className="venture-copy"><span className="kicker dark">{v[1]}</span><h3>{v[2]}</h3><p>{v[3]}</p><a href="#contact">Explore the build <Arrow/></a></div></div></section>;
 }
 
 function Network() {
@@ -568,7 +568,7 @@ function Network() {
   },[]);
 
   return (
-    <section className="network-v16 dark" id="network" ref={sectionRef}>
+    <section className="network-v16 dark" data-tone="ink" id="network" ref={sectionRef}>
       <div className="network-v16-sticky">
         <div className="network-v16-head" data-reveal ref={headRef}>
           <span className="chapter-label">07 / THE NETWORK</span>
@@ -648,28 +648,64 @@ function Network() {
   );
 }
 function Community() {
-  const feed=[["05h","KARTHIK","completed","User Validation"],["08h","BHARGAVI","completed","Problem Discovery"],["12h","BHAVISWA","completed","Prototype Development"],["1d","SRIRAM","completed","Research & Feasibility"]];return <section className="community light"><Reveal className="community-head"><span className="chapter-label dark">08 / IN MOTION</span><h2>THE WORK IS<br/><i>STILL MOVING.</i></h2><p>Startup building isn't a before-and-after story. The interesting part is the work between the milestones.</p></Reveal><div className="feed" data-reveal>{feed.map(([time,name,action,stage],i)=><div className="feed-row" key={name+stage}><span>{time}</span><i/><div><b>{name}</b><span>{action} <em>“{stage}”</em></span></div><small>0{i+1}</small></div>)}</div><div className="community-count" data-reveal><strong>847</strong><span>ENTREPRENEURS<br/>ON THE JOURNEY</span></div></section>;
+  const feed=[["05h","KARTHIK","completed","User Validation"],["08h","BHARGAVI","completed","Problem Discovery"],["12h","BHAVISWA","completed","Prototype Development"],["1d","SRIRAM","completed","Research & Feasibility"]];return <section className="community light" data-tone="paper"><Reveal className="community-head"><span className="chapter-label dark">08 / IN MOTION</span><h2>THE WORK IS<br/><i>STILL MOVING.</i></h2><p>Startup building isn't a before-and-after story. The interesting part is the work between the milestones.</p></Reveal><div className="feed" data-reveal>{feed.map(([time,name,action,stage],i)=><div className="feed-row" key={name+stage}><span>{time}</span><i/><div><b>{name}</b><span>{action} <em>“{stage}”</em></span></div><small>0{i+1}</small></div>)}</div><div className="community-count" data-reveal><strong>847</strong><span>ENTREPRENEURS<br/>ON THE JOURNEY</span></div></section>;
 }
 
 function FAQ() {
-  const [open,setOpen]=useState<number|null>(null), items=[["What is VJ Startups?","A campus startup platform helping college entrepreneurs turn real-world challenges into innovations through a structured journey."],["Who can join?","Students and emerging builders can discover problems, develop ideas, connect with peers, and progress through the startup journey."],["What is the Virtual Startup Journey?","A seven-stage system covering Problem Discovery, Idea & Concept, Research & Feasibility, User Validation, Prototype Development, MVP & Launch, and Growth & Scaling."],["How do the Hubs work?","ProblemHub focuses on discovery, IdeaHub on solution development, and StartupHub on building and scaling ventures."],["Does the ecosystem include mentors and partners?","Yes. The public platform describes entrepreneurship partners, research partners, industry mentors, and a broader network around founders."]];return <section className="faq light"><Reveal className="faq-head"><span className="chapter-label dark">09 / QUESTIONS</span><h2>GOOD QUESTIONS<br/><i>CHANGE THINGS.</i></h2><p>Start with the answer that gets you back to building.</p></Reveal><div className="faq-list" data-reveal>{items.map(([q,a],i)=><div className={`faq-item ${open===i?"open":""}`} key={q}><button onClick={()=>setOpen(open===i?null:i)}><span>0{i+1}</span><b>{q}</b><i>{open===i?"−":"+"}</i></button><div><p>{a}</p></div></div>)}</div></section>;
+  const [open,setOpen]=useState<number|null>(null), items=[["What is VJ Startups?","A campus startup platform helping college entrepreneurs turn real-world challenges into innovations through a structured journey."],["Who can join?","Students and emerging builders can discover problems, develop ideas, connect with peers, and progress through the startup journey."],["What is the Virtual Startup Journey?","A seven-stage system covering Problem Discovery, Idea & Concept, Research & Feasibility, User Validation, Prototype Development, MVP & Launch, and Growth & Scaling."],["How do the Hubs work?","ProblemHub focuses on discovery, IdeaHub on solution development, and StartupHub on building and scaling ventures."],["Does the ecosystem include mentors and partners?","Yes. The public platform describes entrepreneurship partners, research partners, industry mentors, and a broader network around founders."]];return <section className="faq light" data-tone="paper"><Reveal className="faq-head"><span className="chapter-label dark">09 / QUESTIONS</span><h2>GOOD QUESTIONS<br/><i>CHANGE THINGS.</i></h2><p>Start with the answer that gets you back to building.</p></Reveal><div className="faq-list" data-reveal>{items.map(([q,a],i)=><div className={`faq-item ${open===i?"open":""}`} key={q}><button onClick={()=>setOpen(open===i?null:i)}><span>0{i+1}</span><b>{q}</b><i>{open===i?"−":"+"}</i></button><div><p>{a}</p></div></div>)}</div></section>;
+}
+
+const TONES:Record<string,string>={ink:"#080808",paper:"#f0eee8",pink:"#ff4aa7"};
+
+function PageField(){
+  const ref=useRef<HTMLDivElement>(null);
+  useEffect(()=>{
+    let marks:{top:number,tone:string}[]=[];
+    const measure=()=>{
+      marks=Array.from(document.querySelectorAll<HTMLElement>("[data-tone]")).map(el=>({top:el.getBoundingClientRect().top+window.scrollY,tone:el.dataset.tone||"ink"}));
+    };
+    measure();
+    document.fonts?.ready.then(measure);
+    const ro=new ResizeObserver(measure);
+    ro.observe(document.body);
+    let raf=0,applied="";
+    const tick=()=>{
+      if(marks.length&&ref.current){
+        const focus=window.scrollY+window.innerHeight*.5;
+        const w=window.innerHeight*.6;
+        let color=TONES[marks[0].tone];
+        for(let i=1;i<marks.length;i++){
+          const t=ease(band(focus,marks[i].top-w/2,marks[i].top+w/2));
+          if(t===0)break;
+          color=t===1?TONES[marks[i].tone]:mixHex(TONES[marks[i-1].tone],TONES[marks[i].tone],t);
+          if(t<1)break;
+        }
+        if(color!==applied){ref.current.style.backgroundColor=color;applied=color;}
+      }
+      raf=requestAnimationFrame(tick);
+    };
+    raf=requestAnimationFrame(tick);
+    return()=>{ro.disconnect();cancelAnimationFrame(raf)};
+  },[]);
+  return <div className="page-field" ref={ref} aria-hidden="true"/>;
 }
 
 export default function Home(){
-  const [progress,setProgress]=useState(0);
+  const progressRef=useRef<HTMLSpanElement>(null);
   const [navHidden,setNavHidden]=useState(false);
   useEffect(()=>{
-    SmoothScroll;
     const observer=new IntersectionObserver(entries=>entries.forEach(e=>e.isIntersecting&&e.target.classList.add("revealed")),{threshold:.07});
     document.querySelectorAll("[data-reveal]").forEach(el=>observer.observe(el));
-
+    return()=>observer.disconnect();
+  },[]);
+  useEffect(()=>{
     let raf=0;
     let lastY=window.scrollY;
     let hidden=false;
     const tick=()=>{
       const y=window.scrollY;
       const max=document.documentElement.scrollHeight-window.innerHeight;
-      setProgress(max>0?y/max:0);
+      if(progressRef.current)progressRef.current.style.transform=`scaleX(${max>0?y/max:0})`;
 
       const delta=y-lastY;
       if(y<90){
@@ -679,15 +715,15 @@ export default function Home(){
       }else if(delta<-7){
         hidden=false;
       }
-      if(hidden!==navHidden) setNavHidden(hidden);
+      setNavHidden(hidden);
       lastY=y;
       raf=requestAnimationFrame(tick);
     };
 
     raf=requestAnimationFrame(tick);
-    return()=>{observer.disconnect();cancelAnimationFrame(raf)};
-  },[navHidden]);
-  return <><Intro/><Cursor/><SmoothScroll/><div className="global-progress"><span style={{transform:`scaleX(${progress})`}}/></div><header className={`nav ${navHidden?"nav-hidden":""}`}><nav><Mark/><div className="links"><a href="#journey">Journey</a><a href="#proof">Experience</a><a href="#ventures">Ventures</a><a href="#network">Network</a></div><div className="nav-right"><span>HYDERABAD / IN</span><Magnetic href="#contact"><span>Start building</span><Arrow/></Magnetic></div><button className="menu" aria-label="Menu"><span/><span/></button></nav></header><main><Hero/><section className="statement dark"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>08</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" id="contact">
+    return()=>cancelAnimationFrame(raf);
+  },[]);
+  return <><Intro/><Cursor/><SmoothScroll/><PageField/><div className="global-progress"><span ref={progressRef}/></div><header className={`nav ${navHidden?"nav-hidden":""}`}><nav><Mark/><div className="links"><a href="#journey">Journey</a><a href="#proof">Experience</a><a href="#ventures">Ventures</a><a href="#network">Network</a></div><div className="nav-right"><span>HYDERABAD / IN</span><Magnetic href="#contact"><span>Start building</span><Arrow/></Magnetic></div><button className="menu" aria-label="Menu"><span/><span/></button></nav></header><main><Hero/><section className="statement dark" data-tone="ink"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark" data-tone="ink"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>08</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" data-tone="pink" id="contact">
   <div className="contact-v13-back" aria-hidden="true">
     <span>QUESTION</span><span>BUILD</span><span>PROVE</span><span>IMPACT</span>
   </div>
@@ -701,7 +737,7 @@ export default function Home(){
   </Reveal>
   <div className="contact-meta"><span>HYDERABAD / INDIA</span><span>PROBLEMS → IDEAS → STARTUPS</span><span>2026</span></div>
 </section>
-<footer className="footer-v13">
+<footer className="footer-v13" data-tone="ink">
   <div className="footer-word"><span>VJ</span><i>STARTUPS</i></div>
   <div className="footer-orbits"><span/><span/><span/></div>
   <div className="footer-grid">
