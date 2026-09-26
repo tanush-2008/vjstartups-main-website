@@ -80,3 +80,15 @@
   .lx-grid{grid-template-columns:1fr;gap:20px}
   .lx-search input{font-size:16px}
 }
+
+/* Card extras */
+.lx-card-line{position:relative;z-index:2;margin:0;color:hsl(var(--muted-foreground));font:9px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.lx-card-line a{color:var(--white);text-decoration:none;border-bottom:1px solid rgba(247,245,239,.25)}
+.lx-card-line a:hover{color:var(--lx-accent);border-color:var(--lx-accent)}
+.lx-stage{display:flex;align-items:center;gap:12px;color:hsl(var(--muted-foreground));font:9px var(--mono);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.lx-stage-bar{flex:1;height:2px;overflow:hidden;border-radius:2px;background:rgba(247,245,239,.1)}
+.lx-stage-bar span{display:block;height:100%;background:var(--lx-accent)}
+.lx-card-placeholder{display:grid;place-items:center;width:100%;height:100%;background:radial-gradient(circle at 70% 30%,color-mix(in srgb,var(--lx-accent) 18%,transparent),transparent 55%),#0d0d0c;color:var(--lx-accent);font:800 clamp(90px,9vw,150px) var(--sans);letter-spacing:-.08em;text-transform:uppercase}
+.lx-tag.is-static{cursor:default}
+.lx-tag.is-static:hover{border-color:rgba(247,245,239,.12);color:rgba(247,245,239,.72)}
+.lx-grid>div>.lx-card{flex:1}
