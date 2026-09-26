@@ -713,9 +713,9 @@ const VirtualStartupJourney: React.FC = () => {
 
   const getTierColor = (tier: 'problem' | 'idea' | 'startup') => {
     switch (tier) {
-      case 'problem': return 'from-orange-500 to-red-500';
-      case 'idea': return 'from-blue-500 to-indigo-500';
-      case 'startup': return 'from-green-500 to-emerald-500';
+      case 'problem': return 'from-pink-400 to-pink-400 text-black';
+      case 'idea': return 'from-lime-400 to-lime-400 text-black';
+      case 'startup': return 'from-violet-400 to-violet-400 text-black';
     }
   };
 
@@ -935,9 +935,9 @@ const VirtualStartupJourney: React.FC = () => {
                           </div>
                         </div>
                         <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          progress.stageType === 'problem' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300' :
-                          progress.stageType === 'idea' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' :
-                          'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300'
+                          progress.stageType === 'problem' ? 'bg-pink-950/50 text-pink-300' :
+                          progress.stageType === 'idea' ? 'bg-lime-950/50 text-lime-300' :
+                          'bg-violet-950/50 text-violet-300'
                         }`}>
                           {progress.stageType}
                         </div>
@@ -1111,7 +1111,7 @@ const VirtualStartupJourney: React.FC = () => {
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {currentStage.name}
                 </h3>
-                <Badge variant="outline" className={`bg-gradient-to-r ${getTierColor(currentStage.tier)} text-white border-none px-3 py-1`}>
+                <Badge variant="outline" className={`bg-gradient-to-r ${getTierColor(currentStage.tier)} border-none px-3 py-1`}>
                   {currentStage.trl}
                 </Badge>
               </div>
@@ -1153,7 +1153,7 @@ const VirtualStartupJourney: React.FC = () => {
                           disabled={!isAccessible}
                           className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all whitespace-nowrap relative z-10 ${
                             activeStage === stage.id
-                              ? `bg-gradient-to-r ${getTierColor(stage.tier)} text-white border-transparent shadow-lg`
+                              ? `bg-gradient-to-r ${getTierColor(stage.tier)} border-transparent shadow-lg`
                               : hasQuizPassed
                               ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700'
                               : !isAccessible
@@ -1335,7 +1335,7 @@ const VirtualStartupJourney: React.FC = () => {
               <div className="space-y-3">
                 {currentStage.tier === 'problem' && (
                   <Link to="/problems">
-                    <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
+                    <Button className="w-full rounded-full bg-pink-400 font-extrabold text-black hover:bg-pink-300">
                       <Target className="w-4 h-4 mr-2" />
                       Discover Problems
                     </Button>
@@ -1344,7 +1344,7 @@ const VirtualStartupJourney: React.FC = () => {
                 
                 {currentStage.tier === 'idea' && (
                   <Link to="/ideas">
-                    <Button className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white">
+                    <Button className="w-full rounded-full bg-lime-400 font-extrabold text-black hover:bg-lime-300">
                       <Lightbulb className="w-4 h-4 mr-2" />
                       Share Your Idea
                     </Button>
@@ -1353,7 +1353,7 @@ const VirtualStartupJourney: React.FC = () => {
                 
                 {currentStage.tier === 'startup' && (
                   <Link to="/startups">
-                    <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white">
+                    <Button className="w-full rounded-full bg-violet-400 font-extrabold text-black hover:bg-violet-300">
                       <Rocket className="w-4 h-4 mr-2" />
                       Launch Startup
                     </Button>
@@ -1381,10 +1381,10 @@ const VirtualStartupJourney: React.FC = () => {
               <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Explore Hubs</h4>
               <div className="space-y-3">
                 <Link to="/problems" className="block">
-                  <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors group">
+                  <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white/5 transition-colors group">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
-                        <Target className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 bg-pink-400 rounded-lg flex items-center justify-center">
+                        <Target className="w-4 h-4 text-black" />
                       </div>
                       <div>
                         <div className="font-medium text-gray-900 dark:text-white">ProblemHub</div>
@@ -1396,10 +1396,10 @@ const VirtualStartupJourney: React.FC = () => {
                 </Link>
 
                 <Link to="/ideas" className="block">
-                  <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group">
+                  <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white/5 transition-colors group">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
-                        <Lightbulb className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 bg-lime-400 rounded-lg flex items-center justify-center">
+                        <Lightbulb className="w-4 h-4 text-black" />
                       </div>
                       <div>
                         <div className="font-medium text-gray-900 dark:text-white">IdeaHub</div>
@@ -1411,10 +1411,10 @@ const VirtualStartupJourney: React.FC = () => {
                 </Link>
 
                 <Link to="/startups" className="block">
-                  <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors group">
+                  <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white/5 transition-colors group">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
-                        <Rocket className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 bg-violet-400 rounded-lg flex items-center justify-center">
+                        <Rocket className="w-4 h-4 text-black" />
                       </div>
                       <div>
                         <div className="font-medium text-gray-900 dark:text-white">StartupHub</div>
