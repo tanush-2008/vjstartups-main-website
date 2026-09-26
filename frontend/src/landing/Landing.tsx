@@ -1,7 +1,13 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Lenis from "lenis";
+import { useUser } from "@/pages/UserContext";
+import "./landing.css";
+
+const PLANE_ADMIN_URL = import.meta.env.VITE_PLANE_ADMIN_URL || "http://localhost:3001/god-mode/";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:6220";
+const MENTOR_NETWORK = "/programs/mentorship-program-1?tab=mentors#faculty-mentor-panel";
+const PLATFORM_LINKS = [["Problems", "/problems"], ["Ideas", "/ideas"], ["Startups", "/startups"], ["Programs", "/programs"], ["Club", "/club"]] as const;
 
 const IMG = {
   hero: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=2200&q=92",
@@ -28,9 +34,9 @@ const STAGES = [
 ] as const;
 
 const HUBS = [
-  ["ProblemHub", "DISCOVER", "The problem is the first customer.", IMG.people],
-  ["IdeaHub", "CREATE", "Turn a real observation into something testable.", IMG.pitch],
-  ["StartupHub", "SCALE", "Take evidence, make it traction, and keep going.", IMG.founders],
+  ["ProblemHub", "DISCOVER", "The problem is the first customer.", IMG.people, "/problems"],
+  ["IdeaHub", "CREATE", "Turn a real observation into something testable.", IMG.pitch, "/ideas"],
+  ["StartupHub", "SCALE", "Take evidence, make it traction, and keep going.", IMG.founders, "/startups"],
 ] as const;
 
 const VENTURES = [
@@ -43,11 +49,17 @@ function Mark() {
   return <a className="brand" href="#top" aria-label="VJ Startups"><span className="brand-symbol"><i/><i/><i/><i/><i/><i/></span><span>VJ STARTUPS</span></a>;
 }
 function Arrow() { return <span className="arrow">↗</span>; }
-function Reveal({ children, className="" }: { children: React.ReactNode; className?: string }) { return <div data-reveal className={className}>{children}</div>; }
+function Reveal({ children, className="" }: { children: ReactNode; className?: string }) { return <div data-reveal className={className}>{children}</div>; }
 
-function Magnetic({ href, children }: { href:string; children:React.ReactNode }) {
+function Magnetic({ href, children, variant }: { href:string; children:ReactNode; variant?:"ghost" }) {
   const ref=useRef<HTMLAnchorElement>(null);
-  return <a ref={ref} href={href} className="magnetic" onMouseMove={(e)=>{const r=ref.current?.getBoundingClientRect();if(!r||!ref.current)return;ref.current.style.setProperty("--tx",`${((e.clientX-r.left)/r.width-.5)*11}px`);ref.current.style.setProperty("--ty",`${((e.clientY-r.top)/r.height-.5)*11}px`);}} onMouseLeave={()=>{ref.current?.style.setProperty("--tx","0px");ref.current?.style.setProperty("--ty","0px");}}>{children}</a>;
+  const handlers={
+    onMouseMove:(e:ReactMouseEvent)=>{const r=ref.current?.getBoundingClientRect();if(!r||!ref.current)return;ref.current.style.setProperty("--tx",`${((e.clientX-r.left)/r.width-.5)*11}px`);ref.current.style.setProperty("--ty",`${((e.clientY-r.top)/r.height-.5)*11}px`);},
+    onMouseLeave:()=>{ref.current?.style.setProperty("--tx","0px");ref.current?.style.setProperty("--ty","0px");},
+  };
+  const className=`magnetic${variant?` ${variant}`:""}`;
+  if(href.startsWith("/"))return <Link ref={ref} to={href} className={className} {...handlers}>{children}</Link>;
+  return <a ref={ref} href={href} className={className} {...handlers}>{children}</a>;
 }
 
 function Cursor() {
@@ -56,12 +68,11 @@ function Cursor() {
   useEffect(()=>{
     target.current={x:window.innerWidth/2,y:window.innerHeight/2};current.current={...target.current};
     let raf=0;
+    const root=document.querySelector<HTMLElement>(".vj-landing")??document.documentElement;
     const move=(e:PointerEvent)=>{
       target.current.x=e.clientX;target.current.y=e.clientY;
       const interactive=Boolean((e.target as HTMLElement|null)?.closest("a,button"));
-      document.documentElement.style.setProperty("--cursor-active",interactive?"1":"0");
-      document.documentElement.style.setProperty("--cx",`${e.clientX}px`);
-      document.documentElement.style.setProperty("--cy",`${e.clientY}px`);
+      root.style.setProperty("--cursor-active",interactive?"1":"0");
     };
     const loop=()=>{current.current.x+=(target.current.x-current.current.x)*.12;current.current.y+=(target.current.y-current.current.y)*.12;if(blob.current)blob.current.style.transform=`translate3d(${current.current.x}px,${current.current.y}px,0) translate(-50%,-50%)`;if(ring.current)ring.current.style.transform=`translate3d(${target.current.x}px,${target.current.y}px,0) translate(-50%,-50%)`;raf=requestAnimationFrame(loop);};
     window.addEventListener("pointermove",move,{passive:true});raf=requestAnimationFrame(loop);
@@ -92,11 +103,16 @@ function SmoothScroll() {
   return null;
 }
 
+const INTRO_KEY="vj-intro-seen";
+
 function Intro() {
+  const [skip]=useState(()=>{try{return sessionStorage.getItem(INTRO_KEY)==="1";}catch{return false;}});
   const [done,setDone]=useState(false);
   const [p,setP]=useState(0);
 
   useEffect(()=>{
+    if(skip)return;
+    try{sessionStorage.setItem(INTRO_KEY,"1");}catch{/* private mode: intro just replays */}
     const duration=1680;
     const start=performance.now();
     let raf=0;
@@ -125,6 +141,7 @@ function Intro() {
 
   const current=phases[phase];
 
+  if(skip)return null;
   return (
     <div className={`intro-v16 ${done?"exit":""}`} aria-hidden="true" data-phase={phase}>
       <div className="intro-v16-grid"/>
@@ -202,7 +219,24 @@ function mixHex(a:string,b:string,t:number){
 const ease=(t:number)=>t*t*(3-2*t);
 const band=(p:number,a:number,b:number)=>ease(Math.min(Math.max((p-a)/(b-a),0),1));
 
+type Announcement={title:string;content:string};
+
+function useLatestAnnouncement(){
+  const [news,setNews]=useState<Announcement|null>(null);
+  useEffect(()=>{
+    let live=true;
+    fetch(`${API_BASE}/announcements-api/`)
+      .then(r=>r.json())
+      .then(d=>{if(live&&d?.success&&d.announcements?.length)setNews(d.announcements[0]);})
+      .catch(()=>{});
+    return()=>{live=false;};
+  },[]);
+  return news;
+}
+
 function Hero() {
+  const { user }=useUser();
+  const news=useLatestAnnouncement();
   const outer=useRef<HTMLElement>(null);
   const sticky=useRef<HTMLDivElement>(null);
   const reveal=useRef<HTMLDivElement>(null);
@@ -288,7 +322,9 @@ function Hero() {
       <div className="hero-v12 opening-sticky" ref={sticky}>
       <div className="hero-v12-top">
         <span>VJ STARTUPS / HYDERABAD</span>
-        <span>REAL PROBLEMS / REAL BUILDERS / REAL VENTURES</span>
+        {news
+          ? <span className="hero-news" title={`${news.title} — ${news.content}`}><b>NEWS</b>{news.title}</span>
+          : <span>REAL PROBLEMS / REAL BUILDERS / REAL VENTURES</span>}
       </div>
 
       <div className="hero-v12-orbits" aria-hidden="true">
@@ -328,7 +364,8 @@ function Hero() {
 
       <div className="hero-v12-intro">
         <p>Start with what is broken.<br/>Follow the evidence.<br/>Build until reality says yes.</p>
-        <Magnetic href="#start"><span>Find where you are</span><Arrow/></Magnetic>
+        <Magnetic href={user?"/problems":"/login"}><span>Explore problems</span><Arrow/></Magnetic>
+        <Magnetic href="/ideas" variant="ghost"><span>View solutions</span></Magnetic>
       </div>
 
       <div className="hero-v12-side hero-side-left">00 — QUESTION</div>
@@ -390,12 +427,12 @@ function Morph() {
 function Starting() {
   const [active,setActive]=useState(0);
   const items=[
-    ["I HAVE A PROBLEM","Good. Stay here a little longer.","ProblemHub is where friction becomes a defined problem worth solving."],
-    ["I HAVE AN IDEA","Now make it uncomfortable.","IdeaHub helps you test the assumptions hidden inside the idea."],
-    ["I HAVE A PROTOTYPE","Put it in the world.","Use the journey to validate the product, collect evidence, and iterate."],
-    ["I HAVE TRACTION","Make it repeatable.","StartupHub is where evidence becomes systems, networks, and growth."],
+    ["I HAVE A PROBLEM","Good. Stay here a little longer.","ProblemHub is where friction becomes a defined problem worth solving.","Open ProblemHub","/problems"],
+    ["I HAVE AN IDEA","Now make it uncomfortable.","IdeaHub helps you test the assumptions hidden inside the idea.","Validate your idea","/idea-validation"],
+    ["I HAVE A PROTOTYPE","Put it in the world.","Use the journey to validate the product, collect evidence, and iterate.","Enter the journey","/journey"],
+    ["I HAVE TRACTION","Make it repeatable.","StartupHub is where evidence becomes systems, networks, and growth.","Explore StartupHub","/startups"],
   ];
-  return <section className="starting light" data-tone="paper" id="start"><Reveal className="starting-head"><span className="chapter-label dark">01A / ORIENTATION</span><h2>WHERE ARE<br/><i>YOU NOW?</i></h2><p>Don't follow a template. Start from the truth of what you already have.</p></Reveal><div className="starting-panel" data-reveal><div className="starting-tabs">{items.map(([label],i)=><button key={label} className={i===active?"active":""} onClick={()=>setActive(i)}><small>0{i+1}</small>{label}</button>)}</div><div className="starting-response"><span className="response-no">0{active+1}</span><span className="kicker dark">YOUR NEXT MOVE</span><h3>{items[active][1]}</h3><p>{items[active][2]}</p><Magnetic href="#journey"><span>Enter the journey</span><Arrow/></Magnetic></div></div></section>;
+  return <section className="starting light" data-tone="paper" id="start"><Reveal className="starting-head"><span className="chapter-label dark">01A / ORIENTATION</span><h2>WHERE ARE<br/><i>YOU NOW?</i></h2><p>Don't follow a template. Start from the truth of what you already have.</p></Reveal><div className="starting-panel" data-reveal><div className="starting-tabs">{items.map(([label],i)=><button key={label} className={i===active?"active":""} onClick={()=>setActive(i)}><small>0{i+1}</small>{label}</button>)}</div><div className="starting-response"><span className="response-no">0{active+1}</span><span className="kicker dark">YOUR NEXT MOVE</span><h3>{items[active][1]}</h3><p>{items[active][2]}</p><Magnetic href={items[active][4]}><span>{items[active][3]}</span><Arrow/></Magnetic></div></div></section>;
 }
 
 function Journey() {
@@ -403,7 +440,7 @@ function Journey() {
   useEffect(()=>{let raf=0;const tick=()=>{const el=ref.current;if(!el){raf=requestAnimationFrame(tick);return}const r=el.getBoundingClientRect();const total=Math.max(el.offsetHeight-window.innerHeight,1);const p=Math.min(Math.max(-r.top/total,0),1);setPercent(Math.round(p*100));setIndex(Math.min(STAGES.length-1,Math.floor(p*STAGES.length)));raf=requestAnimationFrame(tick)};raf=requestAnimationFrame(tick);return()=>cancelAnimationFrame(raf)},[]);
   const go=(i:number)=>{const el=ref.current;if(!el)return;const top=el.getBoundingClientRect().top+window.scrollY;const travel=el.offsetHeight-window.innerHeight;window.scrollTo({top:top+travel*((i+.5)/STAGES.length),behavior:"smooth"})};
   const s=STAGES[index];
-  return <section className="journey" data-tone="ink" id="journey" ref={ref}><div className="journey-sticky"><div className="journey-top"><span>02 / THE JOURNEY</span><span>{s[0]} / 07</span></div><div className="journey-copy"><span className="stage-kicker">{s[1]}</span><span className="stage-number">{s[0]}</span><h2>{s[2]}</h2><p>{s[3]}</p><a href="#contact">Keep building <Arrow/></a></div><div className="journey-image">{STAGES.map((x,i)=><img key={x[0]} src={x[4]} alt="" className={i===index?"active":""}/>) }<div className="journey-shade"/><div className="journey-image-meta"><span>VIRTUAL STARTUP JOURNEY</span><span>{percent}%</span></div></div><div className="journey-dots">{STAGES.map((x,i)=><button key={x[0]} className={i===index?"active":""} onClick={()=>go(i)}>{x[0]}<i/></button>)}</div></div></section>;
+  return <section className="journey" data-tone="ink" id="journey" ref={ref}><div className="journey-sticky"><div className="journey-top"><span>02 / THE JOURNEY</span><span>{s[0]} / 07</span></div><div className="journey-copy"><span className="stage-kicker">{s[1]}</span><span className="stage-number">{s[0]}</span><h2>{s[2]}</h2><p>{s[3]}</p><Link to="/journey">Open your journey <Arrow/></Link></div><div className="journey-image">{STAGES.map((x,i)=><img key={x[0]} src={x[4]} alt="" className={i===index?"active":""}/>) }<div className="journey-shade"/><div className="journey-image-meta"><span>VIRTUAL STARTUP JOURNEY</span><span>{percent}%</span></div></div><div className="journey-dots">{STAGES.map((x,i)=><button key={x[0]} className={i===index?"active":""} onClick={()=>go(i)}>{x[0]}<i/></button>)}</div></div></section>;
 }
 
 function Sphere() {
@@ -488,7 +525,7 @@ function Sphere() {
   </section>;
 }
 function Hubs() {
-  const [active,setActive]=useState(0);return <section className="hubs light" data-tone="paper"><Reveal className="hubs-head"><span className="chapter-label dark">04 / ENTRY POINTS</span><h2>THREE DOORS.<br/><i>ONE SYSTEM.</i></h2><p>Different starts. Same underlying journey from problem to proof.</p></Reveal><div className="hub-layout" data-reveal><div className="hub-list">{HUBS.map((h,i)=><button key={h[0]} className={i===active?"active":""} onMouseEnter={()=>setActive(i)} onClick={()=>setActive(i)}><span>0{i+1}</span><div><small>{h[1]}</small><b>{h[0]}</b></div><Arrow/></button>)}</div><div className="hub-view">{HUBS.map((h,i)=><img key={h[0]} src={h[3]} alt="" className={i===active?"active":""}/>)}<div><span>{HUBS[active][1]}</span><h3>{HUBS[active][2]}</h3></div></div></div></section>;
+  const [active,setActive]=useState(0);return <section className="hubs light" data-tone="paper"><Reveal className="hubs-head"><span className="chapter-label dark">04 / ENTRY POINTS</span><h2>THREE DOORS.<br/><i>ONE SYSTEM.</i></h2><p>Different starts. Same underlying journey from problem to proof.</p></Reveal><div className="hub-layout" data-reveal><div className="hub-list">{HUBS.map((h,i)=><button key={h[0]} className={i===active?"active":""} onMouseEnter={()=>setActive(i)} onClick={()=>setActive(i)}><span>0{i+1}</span><div><small>{h[1]}</small><b>{h[0]}</b></div><Arrow/></button>)}</div><div className="hub-view">{HUBS.map((h,i)=><img key={h[0]} src={h[3]} alt="" className={i===active?"active":""}/>)}<div><span>{HUBS[active][1]}</span><h3>{HUBS[active][2]}</h3><Link className="hub-enter" to={HUBS[active][4]}>Enter {HUBS[active][0]} <Arrow/></Link></div></div></div></section>;
 }
 
 function WorkField() {
@@ -496,7 +533,7 @@ function WorkField() {
 }
 
 function Ventures() {
-  const [active,setActive]=useState(0), v=VENTURES[active];return <section className="ventures light" data-tone="paper" id="ventures"><Reveal className="ventures-head"><span className="chapter-label dark">06 / PROOF</span><h2>IDEAS THAT<br/><i>MOVED.</i></h2><p>Selected ventures and technologies already moving through the ecosystem.</p></Reveal><div className="venture-stage" data-reveal><div className="venture-menu">{VENTURES.map((x,i)=><button key={x[0]} className={i===active?"active":""} onClick={()=>setActive(i)}><span>{x[0]}</span><div><small>{x[1]}</small><b>{x[2]}</b></div><Arrow/></button>)}</div><div className="venture-image"><img src={v[4]} alt="" key={v[0]}/><div><span>{v[1]}</span><span>{v[0]} / 03</span></div></div><div className="venture-copy"><span className="kicker dark">{v[1]}</span><h3>{v[2]}</h3><p>{v[3]}</p><a href="#contact">Explore the build <Arrow/></a></div></div></section>;
+  const [active,setActive]=useState(0), v=VENTURES[active];return <section className="ventures light" data-tone="paper" id="ventures"><Reveal className="ventures-head"><span className="chapter-label dark">06 / PROOF</span><h2>IDEAS THAT<br/><i>MOVED.</i></h2><p>Selected ventures and technologies already moving through the ecosystem.</p></Reveal><div className="venture-stage" data-reveal><div className="venture-menu">{VENTURES.map((x,i)=><button key={x[0]} className={i===active?"active":""} onClick={()=>setActive(i)}><span>{x[0]}</span><div><small>{x[1]}</small><b>{x[2]}</b></div><Arrow/></button>)}</div><div className="venture-image"><img src={v[4]} alt="" key={v[0]}/><div><span>{v[1]}</span><span>{v[0]} / 03</span></div></div><div className="venture-copy"><span className="kicker dark">{v[1]}</span><h3>{v[2]}</h3><p>{v[3]}</p><Link to="/startups">Explore the build <Arrow/></Link></div></div></section>;
 }
 
 function Network() {
@@ -648,7 +685,7 @@ function Network() {
   );
 }
 function Community() {
-  const feed=[["05h","KARTHIK","completed","User Validation"],["08h","BHARGAVI","completed","Problem Discovery"],["12h","BHAVISWA","completed","Prototype Development"],["1d","SRIRAM","completed","Research & Feasibility"]];return <section className="community light" data-tone="paper" id="community"><Reveal className="community-head"><span className="chapter-label dark">08 / IN MOTION</span><h2>THE WORK IS<br/><i>STILL MOVING.</i></h2><p>Startup building isn't a before-and-after story. The interesting part is the work between the milestones.</p></Reveal><div className="feed" data-reveal>{feed.map(([time,name,action,stage],i)=><div className="feed-row" key={name+stage}><span>{time}</span><i/><div><b>{name}</b><span>{action} <em>“{stage}”</em></span></div><small>0{i+1}</small></div>)}</div><div className="community-count" data-reveal><strong>847</strong><span>ENTREPRENEURS<br/>ON THE JOURNEY</span></div></section>;
+  const feed=[["05h","KARTHIK","completed","User Validation"],["08h","BHARGAVI","completed","Problem Discovery"],["12h","BHAVISWA","completed","Prototype Development"],["1d","SRIRAM","completed","Research & Feasibility"]];return <section className="community light" data-tone="paper" id="community"><Reveal className="community-head"><span className="chapter-label dark">08 / IN MOTION</span><h2>THE WORK IS<br/><i>STILL MOVING.</i></h2><p>Startup building isn't a before-and-after story. The interesting part is the work between the milestones.</p></Reveal><div className="feed" data-reveal>{feed.map(([time,name,action,stage],i)=><div className="feed-row" key={name+stage}><span>{time}</span><i/><div><b>{name}</b><span>{action} <em>“{stage}”</em></span></div><small>0{i+1}</small></div>)}</div><div className="community-count" data-reveal><strong>847</strong><span>ENTREPRENEURS<br/>ON THE JOURNEY</span><Link className="community-link" to="/leaderboard">See who&apos;s leading <Arrow/></Link></div></section>;
 }
 
 function FAQ() {
@@ -690,9 +727,32 @@ function PageField(){
   return <div className="page-field" ref={ref} aria-hidden="true"/>;
 }
 
-export default function Home(){
+function MobileMenu({ onClose, roleLinks, user, onLogout }:{ onClose:()=>void; roleLinks:ReactNode; user:unknown; onLogout:()=>void }){
+  return <div className="mobile-menu" onClick={e=>{if((e.target as HTMLElement).closest("a,button"))onClose();}}>
+    <nav>
+      {PLATFORM_LINKS.map(([label,to])=><Link key={to} to={to}>{label}</Link>)}
+      <Link to="/journey">Journey</Link>
+      <Link to="/leaderboard">Leaderboard</Link>
+      {roleLinks}
+    </nav>
+    <div className="mobile-menu-foot">
+      {user?<button onClick={onLogout}>LOGOUT</button>:<Link to="/login">LOGIN</Link>}
+      <span>HYDERABAD / IN</span>
+    </div>
+  </div>;
+}
+
+export default function Landing(){
+  const { user, setUser }=useUser();
+  const navigate=useNavigate();
+  const [menuOpen,setMenuOpen]=useState(false);
   const progressRef=useRef<HTMLSpanElement>(null);
   const [navHidden,setNavHidden]=useState(false);
+  const logout=()=>{setUser(null);navigate("/login");};
+  const roleLinks=<>
+    {(user?.role==="wing_master"||user?.role==="admin")&&<Link to="/announcements/new">Post announcement</Link>}
+    {user?.role==="admin"&&<a href={PLANE_ADMIN_URL} target="_blank" rel="noopener noreferrer">Admin panel</a>}
+  </>;
   useEffect(()=>{
     const observer=new IntersectionObserver(entries=>entries.forEach(e=>e.isIntersecting&&e.target.classList.add("revealed")),{threshold:.07});
     document.querySelectorAll("[data-reveal]").forEach(el=>observer.observe(el));
@@ -723,7 +783,7 @@ export default function Home(){
     raf=requestAnimationFrame(tick);
     return()=>cancelAnimationFrame(raf);
   },[]);
-  return <><Intro/><Cursor/><SmoothScroll/><PageField/><div className="global-progress"><span ref={progressRef}/></div><header className={`nav ${navHidden?"nav-hidden":""}`}><nav><Mark/><div className="links"><a href="#journey">Journey</a><a href="#proof">Experience</a><a href="#ventures">Ventures</a><a href="#network">Network</a></div><div className="nav-right"><span>HYDERABAD / IN</span><Magnetic href="#contact"><span>Start building</span><Arrow/></Magnetic></div><button className="menu" aria-label="Menu"><span/><span/></button></nav></header><main><Hero/><section className="statement dark" data-tone="ink"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark" data-tone="ink"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>08</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" data-tone="pink" id="contact">
+  return <div className="vj-landing"><Intro/><Cursor/><SmoothScroll/><PageField/><div className="global-progress"><span ref={progressRef}/></div><header className={`nav ${navHidden&&!menuOpen?"nav-hidden":""}`}><nav><Mark/><div className="links">{PLATFORM_LINKS.map(([label,to])=><Link key={to} to={to}>{label}</Link>)}{roleLinks}</div><div className="nav-right"><span>HYDERABAD / IN</span>{user?<button className="nav-text" onClick={logout} title={user.name}>LOGOUT</button>:<Link className="nav-text" to="/login">LOGIN</Link>}<Magnetic href={user?"/journey":"/login"}><span>Start building</span><Arrow/></Magnetic></div><button className="menu" aria-label="Menu" aria-expanded={menuOpen} onClick={()=>setMenuOpen(o=>!o)}><span/><span/></button></nav></header>{menuOpen&&<MobileMenu onClose={()=>setMenuOpen(false)} roleLinks={roleLinks} user={user} onLogout={logout}/>}<main><Hero/><section className="statement dark" data-tone="ink"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark" data-tone="ink"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>08</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" data-tone="pink" id="contact">
   <div className="contact-v13-back" aria-hidden="true">
     <span>QUESTION</span><span>BUILD</span><span>PROVE</span><span>IMPACT</span>
   </div>
@@ -733,7 +793,7 @@ export default function Home(){
       <span className="contact-line">WHAT <i>WILL</i></span>
       <span className="contact-line accent">YOU <i>BUILD?</i></span>
     </h2>
-    <Magnetic href="/login"><span>Start your journey</span><Arrow/></Magnetic>
+    <Magnetic href={user?"/journey":"/login"}><span>Start your journey</span><Arrow/></Magnetic>
   </Reveal>
   <div className="contact-meta"><span>HYDERABAD / INDIA</span><span>PROBLEMS → IDEAS → STARTUPS</span><span>2026</span></div>
 </section>
@@ -741,11 +801,11 @@ export default function Home(){
   <div className="footer-word"><span>VJ</span><i>STARTUPS</i></div>
   <div className="footer-orbits"><span/><span/><span/></div>
   <div className="footer-grid">
-    <div className="footer-brand"><Mark/></div>
-    <div><b>EXPLORE</b><a href="#start">Start here</a><a href="#journey">Journey</a><a href="#ventures">Ventures</a></div>
-    <div><b>NETWORK</b><a href="#network">Mentors</a><a href="#network">Research</a><a href="#network">Industry</a></div>
-    <div><b>RESOURCES</b><a href="#community">Stories</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></div>
+    <div className="footer-brand"><Mark/><p>Empowering college entrepreneurs to build the future, five great startups every year.</p></div>
+    <div><b>EXPLORE</b>{PLATFORM_LINKS.map(([label,to])=><Link key={to} to={to}>{label}</Link>)}</div>
+    <div><b>COMMUNITY</b><Link to="/journey">Startup journey</Link><Link to="/leaderboard">Leaderboard</Link><Link to={MENTOR_NETWORK}>Mentor network</Link><Link to="/changes">What&apos;s new</Link><a href="#faq">FAQ</a></div>
+    <div><b>CONNECT</b><a href="https://www.instagram.com/vj.startups" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://www.linkedin.com/company/vj-startups/" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="mailto:head.iie@vnrvjiet.in">head.iie@vnrvjiet.in</a><a href="mailto:kp@vjstartup.com?subject=Meeting%20Request">Schedule a meeting</a><span>Hyderabad, IN 500090</span></div>
   </div>
-  <div className="footer-bottom"><span>© 2026 VJ Startups</span><span>BUILD WHAT MATTERS.</span><a href="#top">BACK TO TOP ↑</a></div>
-</footer></main></>;
+  <div className="footer-bottom"><span>© 2026 VJ Startups</span><span className="footer-legal"><Link to="/privacy">Privacy</Link><Link to="/terms">Terms</Link></span><a href="#top">BACK TO TOP ↑</a></div>
+</footer></main></div>;
 }

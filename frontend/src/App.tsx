@@ -2,10 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeProvider";
 import Layout from "./components/Layout";
-import Home from "./pages/Home";
+import Landing from "./landing/Landing";
+import Journey from "./pages/Journey";
 import Problems from "./pages/Problems";
 import ProblemDetail from "./pages/ProblemDetail";
 import SubmitProblem from "./pages/SubmitProblem";
@@ -33,6 +35,14 @@ import { UserProvider } from "../src/pages/UserContext";
 
 const queryClient = new QueryClient();
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider
@@ -47,9 +57,11 @@ const App = () => (
         {/* Wrap the entire app with UserProvider */}
         <UserProvider>
           <BrowserRouter>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Home />} />
+            <ScrollToTop />
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route element={<Layout />}>
+                <Route path="/journey" element={<Journey />} />
                 <Route path="/problems" element={<Problems />} />
                 <Route path="/problems/:id" element={<ProblemDetail />} />
                 <Route path="/submit-problem" element={<SubmitProblem />} />
@@ -74,8 +86,8 @@ const App = () => (
                 <Route path="/announcements/new" element={<PostAnnouncement />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Layout>
+              </Route>
+            </Routes>
           </BrowserRouter>
         </UserProvider>
       </TooltipProvider>

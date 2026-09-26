@@ -1,17 +1,18 @@
 import { ReactNode } from "react";
+import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import FloatingActionButton from "./FloatingActionButton";
 
 interface LayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="overflow-x-hidden">{children}</main>
+      <main className="overflow-x-hidden">{children ?? <Outlet />}</main>
       <Footer />
       <FloatingActionButton />
     </div>
