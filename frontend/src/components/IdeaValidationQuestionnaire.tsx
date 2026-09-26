@@ -191,9 +191,9 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
-    return "text-red-600";
+    if (score >= 80) return "text-green-400";
+    if (score >= 60) return "text-yellow-400";
+    return "text-red-400";
   };
 
   const getScoreLabel = (score: number) => {
@@ -208,7 +208,7 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
       <div className="max-w-4xl mx-auto p-6 space-y-6">
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold text-green-600">
+            <CardTitle className="text-3xl font-extrabold text-vj-primary">
               Idea Validation Results
             </CardTitle>
             <CardDescription>
@@ -217,11 +217,11 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Overall Score */}
-            <div className="text-center p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
+            <div className="text-center p-6 rounded-[22px] border border-white/10 bg-[hsl(var(--card))]">
               <div className={`text-6xl font-bold ${getScoreColor(results.score.overallScore)}`}>
                 {results.score.overallScore}
               </div>
-              <div className="text-xl font-semibold text-gray-700">
+              <div className="text-xl font-semibold text-vj-primary">
                 Overall Score ({getScoreLabel(results.score.overallScore)})
               </div>
             </div>
@@ -234,7 +234,7 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
                     <div className={`text-2xl font-bold ${getScoreColor(score)}`}>
                       {score}
                     </div>
-                    <div className="text-sm font-medium text-gray-600 capitalize">
+                    <div className="text-sm font-medium text-vj-muted capitalize">
                       {key.replace(/([A-Z])/g, ' $1').trim()}
                     </div>
                     <Badge variant={score >= 70 ? "default" : score >= 50 ? "secondary" : "destructive"}>
@@ -312,10 +312,10 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold text-green-600">
+        <h2 className="text-3xl font-extrabold text-vj-primary">
           {stageTransition ? 'Stage Transition Validation' : 'Idea Stage Validation Questionnaire'}
-        </h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        </h2>
+        <p className="text-vj-muted max-w-2xl mx-auto">
           {stageTransition ? 
             `Validate your idea's readiness to move from ${stageTransition.stageLabels[stageTransition.from]} to ${stageTransition.stageLabels[stageTransition.to]}` :
             'Validate your startup idea with our comprehensive assessment'
@@ -324,13 +324,13 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
         
         {/* Stage Transition Info */}
         {stageTransition && (
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 max-w-md mx-auto">
+          <div className="bg-[hsl(var(--card))] p-4 rounded-[18px] border border-violet-400/30 max-w-md mx-auto">
             <div className="flex items-center justify-center gap-3">
-              <Badge variant="outline" className="bg-blue-100 text-blue-800">
+              <Badge variant="outline" className="bg-violet-950 text-violet-300">
                 {stageTransition.from + 1}. {stageTransition.stageLabels[stageTransition.from]}
               </Badge>
-              <ArrowRight className="w-4 h-4 text-blue-600" />
-              <Badge variant="outline" className="bg-green-100 text-green-800">
+              <ArrowRight className="w-4 h-4 text-violet-400" />
+              <Badge variant="outline" className="bg-green-950/60 text-green-300">
                 {stageTransition.to + 1}. {stageTransition.stageLabels[stageTransition.to]}
               </Badge>
             </div>
@@ -340,7 +340,7 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
         {/* Progress Bar */}
         <div className="space-y-2">
           <Progress value={progress} className="w-full" />
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-vj-muted">
             Step {currentStep + 1} of {steps.length}
           </p>
         </div>
@@ -348,18 +348,8 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl font-bold text-green-600">
-                Idea Stage Validation Questionnaire
-              </CardTitle>
-              <CardDescription>
-                Validate your startup idea with our comprehensive assessment
-              </CardDescription>
-            </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-500">Step {currentStep + 1} of {steps.length}</div>
-            </div>
+          <div className="text-right font-mono text-[10px] uppercase tracking-[0.14em] text-vj-muted">
+            Step {String(currentStep + 1).padStart(2, "0")} / {String(steps.length).padStart(2, "0")}
           </div>
         </CardHeader>
 
@@ -375,12 +365,12 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
                 <div key={index} className="flex flex-col items-center min-w-0 flex-1">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
                     isCompleted ? 'bg-green-500 text-white' :
-                    isActive ? 'bg-green-100 text-green-600 border-2 border-green-500' :
-                    'bg-gray-100 text-gray-400'
+                    isActive ? 'bg-green-950/60 text-green-400 border-2 border-green-500' :
+                    'bg-white/5 text-gray-400'
                   }`}>
                     {isCompleted ? <CheckCircle className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                   </div>
-                  <div className={`text-xs text-center ${isActive ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
+                  <div className={`text-xs text-center ${isActive ? 'text-green-400 font-medium' : 'text-vj-muted'}`}>
                     {step.title}
                   </div>
                 </div>
@@ -394,7 +384,7 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
               <div className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-semibold mb-2">Problem Definition</h3>
-                  <p className="text-gray-600">Help us understand the problem you're trying to solve</p>
+                  <p className="text-vj-muted">Help us understand the problem you're trying to solve</p>
                 </div>
 
                 <div>
@@ -449,7 +439,7 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
               <div className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-semibold mb-2">Target Audience</h3>
-                  <p className="text-gray-600">Define who your customers are</p>
+                  <p className="text-vj-muted">Define who your customers are</p>
                 </div>
 
                 <div>
@@ -500,7 +490,7 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
               <div className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-semibold mb-2">Value Proposition</h3>
-                  <p className="text-gray-600">Explain your solution and its unique value</p>
+                  <p className="text-vj-muted">Explain your solution and its unique value</p>
                 </div>
 
                 <div>
@@ -549,7 +539,7 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
               <div className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-semibold mb-2">Market Analysis</h3>
-                  <p className="text-gray-600">Analyze the market opportunity and competition</p>
+                  <p className="text-vj-muted">Analyze the market opportunity and competition</p>
                 </div>
 
                 <div>
@@ -600,7 +590,7 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
               <div className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-semibold mb-2">Feasibility Assessment</h3>
-                  <p className="text-gray-600">Evaluate the technical and resource requirements</p>
+                  <p className="text-vj-muted">Evaluate the technical and resource requirements</p>
                 </div>
 
                 <div>
@@ -678,7 +668,7 @@ const IdeaValidationQuestionnaire = ({ stageTransition, onComplete }: IdeaValida
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+               
               >
                 {currentStep === steps.length - 1 ? (
                   isSubmitting ? "Analyzing..." : "Complete Assessment"

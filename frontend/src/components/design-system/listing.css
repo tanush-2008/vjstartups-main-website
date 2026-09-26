@@ -114,3 +114,12 @@
   .lb .lb-avatar{width:36px;height:36px}
   .lb-badge{display:none}
 }
+
+/* Numbered principles row */
+.iv-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0 0 56px;padding:0;list-style:none;border-top:1px solid hsl(var(--border))}
+.iv-steps li{padding:24px 32px 28px 0}
+.iv-steps li+li{padding-left:32px;border-left:1px solid hsl(var(--border))}
+.iv-steps span{color:var(--lx-accent);font:10px var(--mono);letter-spacing:.14em}
+.lx .iv-steps h3{margin:14px 0 10px;color:var(--white);font-size:24px;font-weight:800;line-height:1;letter-spacing:-.05em}
+.iv-steps p{margin:0;color:hsl(var(--muted-foreground));font-size:13px;line-height:1.55}
+@media(max-width:800px){.iv-steps{grid-template-columns:1fr}.iv-steps li+li{padding-left:0;border-left:0;border-top:1px solid hsl(var(--border))}}
