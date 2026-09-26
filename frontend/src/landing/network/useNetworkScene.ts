@@ -64,7 +64,7 @@ export function useNetworkScene(refs: Refs, apiBase: string, ventures: readonly 
           if (!map) return;
           geometry.current = { canvasLeft: canvas.offsetLeft, mapLeft: map.offsetLeft, mapTop: map.offsetTop };
           const ratio = Math.min(window.devicePixelRatio || 1, compact ? 1.5 : 1.75);
-          instance.resize(canvas.clientWidth, canvas.clientHeight, map.offsetTop + map.offsetHeight * 0.5, ratio);
+          instance.resize(canvas.clientWidth, canvas.clientHeight, map.offsetTop + map.offsetHeight * 0.5, ratio, map.offsetWidth, map.offsetHeight);
         };
         measure();
         ro = new ResizeObserver(measure);

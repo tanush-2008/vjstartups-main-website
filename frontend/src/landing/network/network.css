@@ -5,12 +5,12 @@
 .vj-landing .network-v16.has-scene .network-v16-canvas{opacity:1}
 .vj-landing .network-v16.has-scene .network-v16-sticky{overflow:visible}
 .vj-landing .network-v16.has-scene .network-v16-map{z-index:6}
-.vj-landing .network-v16.has-scene :is(.network-v16-svg,.network-v16-glow,.network-v16-opening){display:none}
+/* The drawn weave is replaced by the points; its glow and "keep going" cue stay. */
+.vj-landing .network-v16.has-scene .network-v16-svg{display:none}
 .vj-landing .network-v16.has-scene .network-v16-map:after{display:none}
 
-/* The seven forces orbit the finished system; positioned per frame from the scene. */
-.vj-landing .network-v16.has-scene .network-v16-node{left:0!important;top:0!important;right:auto!important;bottom:auto!important;opacity:0;transition:none;will-change:transform,opacity}
-.vj-landing .network-v16.has-scene .network-v16-node:after{display:none}
+/* The seven forces keep their V18 places; they arrive with the weave. */
+.vj-landing .network-v16.has-scene .network-v16-node{opacity:0;transition:none}
 
 .vj-landing .network-v16.has-scene .network-v16-caption{color:rgba(255,255,255,.55)}
 .vj-landing .network-v16.has-scene .network-v16-caption span:first-child{color:var(--lime)}
@@ -33,7 +33,5 @@
 
 @media(max-width:700px){
   .vj-landing .network-v16{--net-pad:18px}
-  /* Seven labels don't fit around the system on a phone; the caption carries the stage. */
-  .vj-landing .network-v16.has-scene .network-v16-node{display:none}
   .vj-landing .net-tip-card{max-width:200px}
 }

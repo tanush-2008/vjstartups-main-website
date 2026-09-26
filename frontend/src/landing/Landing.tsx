@@ -550,18 +550,20 @@ function Network() {
       const p=progressOf(frame);
       const scene=net.scene.current;
       if(scene){
-        // Stages: problems, then ideas (.16-.46), then the system (.46-.74), then the panel (.8+).
-        const open=band(p,.8,.96);
-        scene.update(p,frame.now,1-open*.72);
+        // Stages: problems, ideas (.16-.46), the weave (.46-.74), then it parts for the panel (.78+).
+        const open=band(p,.78,.96);
+        const eased=1-Math.pow(1-open,3);
+        scene.update(p,frame.now,eased,1-open*.25);
         scene.render();
         setStage(scene.t2>.5?2:scene.t1>.5?1:0);
-        const {canvasLeft,mapLeft,mapTop}=net.geometry.current;
-        const ring=scene.ring(nodes.current.length);
+        const {canvasLeft}=net.geometry.current;
+        mapRef.current?.style.setProperty("--network-open",String(eased));
+        // The forces keep their V18 places and motion, arriving with the weave.
         nodes.current.forEach((node,i)=>{
           if(!node)return;
-          const s=ring[i];
-          node.style.transform=`translate3d(${s.x+canvasLeft-mapLeft}px,${s.y-mapTop}px,0) translate(-50%,-50%)`;
-          node.style.opacity=String(scene.t2*(.35+.65*s.front)*(1-open*.6));
+          const direction=i%2===0?-1:1;
+          node.style.transform=`translate3d(0,${direction*eased*(20+(i%3)*10)}px,0)`;
+          node.style.opacity=String(scene.t2*(.42+eased*.48));
         });
         const h=hoverRef.current;
         if(h&&tipRef.current){
@@ -569,8 +571,8 @@ function Network() {
           tipRef.current.style.transform=`translate3d(${s.x+canvasLeft}px,${s.y}px,0)`;
         }
         if(panelRef.current){
-          panelRef.current.style.opacity=String(Math.max(0,open-.05));
-          panelRef.current.style.transform=`translate3d(-50%,${(1-open)*95}px,0) scale(${.94+open*.06})`;
+          panelRef.current.style.opacity=String(Math.max(0,eased-.05));
+          panelRef.current.style.transform=`translate3d(-50%,${(1-eased)*95}px,0) scale(${.94+eased*.06})`;
         }
         return;
       }
@@ -630,7 +632,7 @@ function Network() {
   const stageText=[
     net.problems?`01 / ${net.problems} REAL PROBLEMS, POSTED BY STUDENTS`:"01 / PROBLEMS, POSTED BY STUDENTS",
     net.ideas?`02 / ${net.ideas} IDEAS ANSWERING THEM`:"02 / IDEAS ANSWERING THEM",
-    "03 / FUNDED VENTURES AT THE CORE",
+    "03 / ONE WEAVE, WITH THE FUNDED VENTURES ON ITS THREAD",
   ][stage];
 
   return (
