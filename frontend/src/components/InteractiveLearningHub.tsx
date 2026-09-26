@@ -788,7 +788,7 @@ const VirtualStartupJourney: React.FC = () => {
   const personalizedMsg = getPersonalizedMessage();
 
   return (
-    <section className="py-16 px-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
+    <section className="py-16 px-4">
       <div className="max-w-7xl mx-auto">
         
         {/* Header with Personalization */}
@@ -801,7 +801,7 @@ const VirtualStartupJourney: React.FC = () => {
                 className="w-12 h-12 rounded-full border-2 border-indigo-500 object-cover"
               />
             )}
-            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 border border-indigo-200 dark:border-indigo-700 rounded-full">
+            <div className="flex items-center gap-2 px-4 py-2 border border-white/15 bg-transparent rounded-full">
               <MapPin className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">Virtual Startup Journey</span>
             </div>
@@ -823,7 +823,7 @@ const VirtualStartupJourney: React.FC = () => {
                   <>
                     <Button 
                       onClick={handleStartJourney}
-                      className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl"
+                      className="bg-lime-400 hover:bg-lime-300 text-black font-extrabold rounded-full px-6 py-2 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl"
                     >
                       {journeyStatus.hasStarted ? (
                         <>
@@ -1060,7 +1060,7 @@ const VirtualStartupJourney: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
                   onClick={handleTakeQuizNow}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+                  className="bg-lime-400 hover:bg-lime-300 text-black font-extrabold rounded-full"
                 >
                   Take Quiz Now
                 </Button>
