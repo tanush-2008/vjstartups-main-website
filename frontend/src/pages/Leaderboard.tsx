@@ -129,7 +129,7 @@ const Leaderboard = () => {
                 />
                 <div className="lb-who">
                   <b>{entry.name}</b>
-                  <span>{entry.email}</span>
+                  <span>{entry.stagesCompleted} of 7 stages</span>
                 </div>
                 <span className="lb-badge" style={{ color: achievementTier(entry.stagesCompleted) }}>
                   {getStageAchievementName(entry.stagesCompleted)}
