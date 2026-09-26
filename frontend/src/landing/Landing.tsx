@@ -758,6 +758,52 @@ function FAQ() {
 
 const TONES:Record<string,string>={ink:"#080808",paper:"#f0eee8",pink:"#ff4aa7"};
 
+// The landing is one story in three acts; the intro counts through the same words. The rail
+// states where you are in it and jumps between acts.
+const ACTS=[{id:"top",roman:"I",name:"Question"},{id:"journey",roman:"II",name:"Build"},{id:"ventures",roman:"III",name:"Impact"}] as const;
+
+function ActRail(){
+  const railRef=useRef<HTMLElement>(null);
+  const fills=useRef<Array<HTMLSpanElement|null>>([]);
+  const [lengths,setLengths]=useState<number[]>([1,1,1]);
+  const [active,setActive]=useState(0);
+  useEffect(()=>{
+    let starts:number[]=[],end=1;
+    const measure=()=>{
+      starts=ACTS.map(a=>{const el=document.getElementById(a.id);return el?el.getBoundingClientRect().top+window.scrollY:0;});
+      const footer=document.querySelector(".vj-landing .sc-footer");
+      end=footer?footer.getBoundingClientRect().top+window.scrollY:document.documentElement.scrollHeight;
+      setLengths(starts.map((start,i)=>Math.max((i<starts.length-1?starts[i+1]:end)-start,1)));
+    };
+    let raf=0;
+    const paint=()=>{
+      raf=0;
+      const focus=window.scrollY+window.innerHeight*.5;
+      let current=0;
+      starts.forEach((start,i)=>{
+        const stop=i<starts.length-1?starts[i+1]:end;
+        const fill=fills.current[i];
+        if(fill)fill.style.transform=`scaleY(${Math.min(Math.max((focus-start)/(stop-start),0),1)})`;
+        if(focus>=start)current=i;
+      });
+      setActive(current);
+      // Out of the way during the hero and once the footer arrives.
+      railRef.current?.classList.toggle("is-visible",window.scrollY>window.innerHeight*.7&&focus<end);
+    };
+    const schedule=()=>{if(!raf)raf=requestAnimationFrame(paint)};
+    const stop=onMeasure(()=>{measure();schedule();});
+    measure();schedule();
+    window.addEventListener("scroll",schedule,{passive:true});
+    return()=>{stop();window.removeEventListener("scroll",schedule);cancelAnimationFrame(raf)};
+  },[]);
+  return <nav className="act-rail" ref={railRef} aria-label="Story chapters">
+    {ACTS.map((act,i)=><a key={act.id} href={`#${act.id}`} className={i===active?"is-on":""} style={{flexGrow:lengths[i]}} aria-current={i===active?"step":undefined}>
+      <span className="act-track"><span className="act-fill" ref={n=>{fills.current[i]=n}}/></span>
+      <span className="act-label"><b>{act.roman}</b>{act.name}</span>
+    </a>)}
+  </nav>;
+}
+
 // Where the page changes colour, the incoming tone rises as a skyline of the brand mark's
 // slanted, rounded bars. Its edge travels with the incoming section's top (so there is never
 // a straight cut or a muddy in-between grey), and the bars converge to a flat edge as that
@@ -781,7 +827,7 @@ function PageField(){
       marks.forEach(m=>{if(m.tone!==current){edges.push({top:m.top,to:m.tone});current=m.tone;}});
     };
     const SLANT=Math.tan(15*Math.PI/180);
-    let raf=0,appliedBase="",appliedFill="",hidden=false;
+    let raf=0,appliedBase="",appliedFill="",appliedMid="",hidden=false;
     const schedule=()=>{if(!raf)raf=requestAnimationFrame(tick)};
     const remeasure=()=>{measure();schedule()};
     const tick=()=>{
@@ -797,6 +843,9 @@ function PageField(){
       }
       const color=TONES[base];
       if(color!==appliedBase){field.style.backgroundColor=color;appliedBase=color;}
+      // The tone at mid-screen, for chrome that sits there (the act rail).
+      const midTone=next&&next.top-y-amp*.5<vh*.5?next.to:base;
+      if(midTone!==appliedMid){field.parentElement?.setAttribute("data-field",midTone);appliedMid=midTone;}
       if(!next){if(!hidden){svg.style.visibility="hidden";hidden=true;}return;}
       if(hidden){svg.style.visibility="visible";hidden=false;}
       const fill=TONES[next.to];
@@ -863,7 +912,7 @@ export default function Landing(){
     schedule();
     return()=>{stop();window.removeEventListener("scroll",schedule);cancelAnimationFrame(raf)};
   },[]);
-  return <div className="vj-landing"><Intro/><Cursor/><SmoothScroll/><PageField/><div className="global-progress"><span ref={progressRef}/></div><a href="#main" className="skip-link">Skip to content</a><SiteNav overlay brandHref="#top"/><main id="main" tabIndex={-1}><Hero/><section className="statement dark" data-tone="ink"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark" data-tone="ink"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>{String(counters.funded).padStart(2,"0")}</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" data-tone="pink" id="contact">
+  return <div className="vj-landing"><Intro/><Cursor/><SmoothScroll/><PageField/><ActRail/><div className="global-progress"><span ref={progressRef}/></div><a href="#main" className="skip-link">Skip to content</a><SiteNav overlay brandHref="#top"/><main id="main" tabIndex={-1}><Hero/><section className="statement dark" data-tone="ink"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark" data-tone="ink"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>{String(counters.funded).padStart(2,"0")}</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" data-tone="pink" id="contact">
   <div className="contact-v13-back" aria-hidden="true">
     <span>QUESTION</span><span>BUILD</span><span>PROVE</span><span>IMPACT</span>
   </div>
