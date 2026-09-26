@@ -4,22 +4,29 @@ import Lenis from "lenis";
 import { useUser } from "@/pages/UserContext";
 import { counters } from "@/data/mockData";
 import { Arrow, Magnetic, SiteFooter, SiteNav } from "@/components/site/SiteChrome";
+import { onMeasure, pageMetrics, progressOf, useSectionFrame } from "./frame";
 import "./landing.css";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:6220";
 
+// Stock placeholders until the club's own photos arrive. Sized to the device (a phone was
+// downloading 2200px, q92 originals: ~3 MB for the page) and served as AVIF/WebP by auto=format.
+const deviceWidth = typeof window === "undefined" ? 1800 : Math.ceil((window.innerWidth * Math.min(window.devicePixelRatio || 1, 2)) / 200) * 200;
+const unsplash = (id: string, max: number) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${Math.min(max, deviceWidth)}&q=80`;
+
 const IMG = {
-  hero: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=2200&q=92",
-  people: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1800&q=92",
-  pitch: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1800&q=92",
-  research: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1800&q=92",
-  prototype: "https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=1800&q=92",
-  founders: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1800&q=92",
-  room: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1800&q=92",
-  campus: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=92",
-  energy: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1600&q=92",
-  health: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1600&q=92",
-  iot: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=92",
+  hero: unsplash("photo-1556761175-b413da4baf72", 2200),
+  people: unsplash("photo-1523240795612-9a054b0db644", 1800),
+  pitch: unsplash("photo-1551836022-d5d88e9218df", 1800),
+  research: unsplash("photo-1531482615713-2afd69097998", 1800),
+  prototype: unsplash("photo-1581092921461-eab62e97a780", 1800),
+  founders: unsplash("photo-1556761175-5973dc0f32e7", 1800),
+  room: unsplash("photo-1517245386807-bb43f82c33c4", 1800),
+  campus: unsplash("photo-1562774053-701939374585", 1800),
+  energy: unsplash("photo-1473341304170-971dccb5ac1e", 1600),
+  health: unsplash("photo-1576091160399-112ba8d25d1d", 1600),
+  iot: unsplash("photo-1518770660439-4636190af475", 1600),
 };
 
 const STAGES = [
@@ -50,6 +57,7 @@ function Cursor() {
   const blob=useRef<HTMLDivElement>(null), ring=useRef<HTMLDivElement>(null);
   const target=useRef({x:0,y:0}), current=useRef({x:0,y:0});
   useEffect(()=>{
+    if(!window.matchMedia("(hover:hover) and (pointer:fine)").matches)return;
     target.current={x:window.innerWidth/2,y:window.innerHeight/2};current.current={...target.current};
     let raf=0;
     const root=document.querySelector<HTMLElement>(".vj-landing")??document.documentElement;
@@ -57,8 +65,9 @@ function Cursor() {
       target.current.x=e.clientX;target.current.y=e.clientY;
       const interactive=Boolean((e.target as HTMLElement|null)?.closest("a,button"));
       root.style.setProperty("--cursor-active",interactive?"1":"0");
+      if(!raf)raf=requestAnimationFrame(loop);
     };
-    const loop=()=>{current.current.x+=(target.current.x-current.current.x)*.12;current.current.y+=(target.current.y-current.current.y)*.12;if(blob.current)blob.current.style.transform=`translate3d(${current.current.x}px,${current.current.y}px,0) translate(-50%,-50%)`;if(ring.current)ring.current.style.transform=`translate3d(${target.current.x}px,${target.current.y}px,0) translate(-50%,-50%)`;raf=requestAnimationFrame(loop);};
+    const loop=()=>{current.current.x+=(target.current.x-current.current.x)*.12;current.current.y+=(target.current.y-current.current.y)*.12;if(blob.current)blob.current.style.transform=`translate3d(${current.current.x}px,${current.current.y}px,0) translate(-50%,-50%)`;if(ring.current)ring.current.style.transform=`translate3d(${target.current.x}px,${target.current.y}px,0) translate(-50%,-50%)`;const settled=Math.abs(target.current.x-current.current.x)<.1&&Math.abs(target.current.y-current.current.y)<.1;raf=settled?0:requestAnimationFrame(loop);};
     window.addEventListener("pointermove",move,{passive:true});raf=requestAnimationFrame(loop);
     return()=>{window.removeEventListener("pointermove",move);cancelAnimationFrame(raf)};
   },[]);
@@ -230,39 +239,32 @@ function Hero() {
   const cover=useRef<HTMLDivElement>(null);
   const ribbon=useRef<HTMLDivElement>(null);
 
+  const pointer=useRef({rx:0,ry:0,tx:0,ty:0});
+
   useEffect(()=>{
     const el=sticky.current;
     if(!el)return;
-    let rx=0,ry=0,tx=0,ty=0,raf=0;
     const move=(e:PointerEvent)=>{
       const r=el.getBoundingClientRect();
-      tx=((e.clientX-r.left)/r.width-.5)*18;
-      ty=((e.clientY-r.top)/r.height-.5)*12;
+      pointer.current.tx=((e.clientX-r.left)/r.width-.5)*18;
+      pointer.current.ty=((e.clientY-r.top)/r.height-.5)*12;
       if(reveal.current){
         reveal.current.style.setProperty("--cx",`${e.clientX}px`);
         reveal.current.style.setProperty("--cy",`${e.clientY}px`);
       }
     };
-    const loop=()=>{
-      rx+=(tx-rx)*.08;
-      ry+=(ty-ry)*.08;
-      el.style.setProperty("--hx",`${rx}px`);
-      el.style.setProperty("--hy",`${ry}px`);
-      raf=requestAnimationFrame(loop);
-    };
     el.addEventListener("pointermove",move,{passive:true});
-    raf=requestAnimationFrame(loop);
-    return()=>{el.removeEventListener("pointermove",move);cancelAnimationFrame(raf)};
+    return()=>el.removeEventListener("pointermove",move);
   },[]);
 
-  useEffect(()=>{
-    let raf=0;
-    const tick=(now:number)=>{
-      const el=outer.current;
-      if(!el){raf=requestAnimationFrame(tick);return}
-      const rect=el.getBoundingClientRect();
-      const total=Math.max(el.offsetHeight-window.innerHeight,1);
-      const p=Math.min(Math.max(-rect.top/total,0),1);
+  useSectionFrame(outer,frame=>{
+      const now=frame.now;
+      const p=progressOf(frame);
+      const q=pointer.current;
+      q.rx+=(q.tx-q.rx)*.08;
+      q.ry+=(q.ty-q.ry)*.08;
+      sticky.current?.style.setProperty("--hx",`${q.rx}px`);
+      sticky.current?.style.setProperty("--hy",`${q.ry}px`);
 
       const textOut=band(p,.16,.38);
       const blobT=band(p,.30,.82);
@@ -294,12 +296,7 @@ function Hero() {
         ribbon.current.style.opacity=String(ribbonOpacity);
         ribbon.current.style.transform=`translate3d(0,${(1-ribbonIn)*16}px,0)`;
       }
-
-      raf=requestAnimationFrame(tick);
-    };
-    raf=requestAnimationFrame(tick);
-    return()=>cancelAnimationFrame(raf);
-  },[]);
+  });
 
   return (
     <section className="opening" data-tone="ink" ref={outer} id="top">
@@ -322,7 +319,7 @@ function Hero() {
 
       <div className="hero-v12-stage-wrap" ref={blobWrap}>
         <div className="hero-v12-stage opening-blob" ref={blob} aria-hidden="true">
-          <img src={IMG.hero} alt="" ref={blobImg}/>
+          <img src={IMG.hero} alt="" ref={blobImg} {...{fetchpriority:"high"}}/>
           <div className="opening-cover" ref={cover}/>
           <div className="hero-v12-stage-no">VJ / 00</div>
           <div className="hero-v12-stage-caption">A POSSIBILITY BECOMING A THING</div>
@@ -372,14 +369,8 @@ function Hero() {
 }
 function Morph() {
   const ref=useRef<HTMLElement>(null), words=useRef<Array<HTMLDivElement|null>>([]);
-  useEffect(()=>{
-    let raf=0;
-    const tick=()=>{
-      const el=ref.current;
-      if(!el){raf=requestAnimationFrame(tick);return}
-      const rect=el.getBoundingClientRect();
-      const range=Math.max(el.offsetHeight-window.innerHeight,1);
-      const p=Math.min(Math.max(-rect.top/range,0),1);
+  useSectionFrame(ref,frame=>{
+      const p=progressOf(frame);
       words.current.forEach((node,i)=>{
         if(!node)return;
         const phase=i/4;
@@ -390,11 +381,7 @@ function Morph() {
         node.style.setProperty("--blur",`${(1-local)*22}px`);
         node.style.transform=`translate3d(-50%,calc(-50% + ${y}vh),0) scale(${.82+local*.18})`;
       });
-      raf=requestAnimationFrame(tick);
-    };
-    raf=requestAnimationFrame(tick);
-    return()=>cancelAnimationFrame(raf);
-  },[]);
+  });
   const wordsList=["PROBLEM","EVIDENCE","BUILD","IMPACT"];
   return <section className="morph-v13 light" data-tone="paper" ref={ref}>
     <div className="morph-v13-sticky">
@@ -421,30 +408,31 @@ function Starting() {
 
 function Journey() {
   const ref=useRef<HTMLElement>(null), [index,setIndex]=useState(0),[percent,setPercent]=useState(0);
-  useEffect(()=>{let raf=0;const tick=()=>{const el=ref.current;if(!el){raf=requestAnimationFrame(tick);return}const r=el.getBoundingClientRect();const total=Math.max(el.offsetHeight-window.innerHeight,1);const p=Math.min(Math.max(-r.top/total,0),1);setPercent(Math.round(p*100));setIndex(Math.min(STAGES.length-1,Math.floor(p*STAGES.length)));raf=requestAnimationFrame(tick)};raf=requestAnimationFrame(tick);return()=>cancelAnimationFrame(raf)},[]);
+  useSectionFrame(ref,frame=>{const p=progressOf(frame);setPercent(Math.round(p*100));setIndex(Math.min(STAGES.length-1,Math.floor(p*STAGES.length)))});
   const go=(i:number)=>{const el=ref.current;if(!el)return;const top=el.getBoundingClientRect().top+window.scrollY;const travel=el.offsetHeight-window.innerHeight;window.scrollTo({top:top+travel*((i+.5)/STAGES.length),behavior:"smooth"})};
   const s=STAGES[index];
-  return <section className="journey" data-tone="ink" id="journey" ref={ref}><div className="journey-sticky"><div className="journey-top"><span>02 / THE JOURNEY</span><span>{s[0]} / 07</span></div><div className="journey-copy"><span className="stage-kicker">{s[1]}</span><span className="stage-number">{s[0]}</span><h2>{s[2]}</h2><p>{s[3]}</p><Link to="/journey">Open your journey <Arrow/></Link></div><div className="journey-image">{STAGES.map((x,i)=><img key={x[0]} src={x[4]} alt="" className={i===index?"active":""}/>) }<div className="journey-shade"/><div className="journey-image-meta"><span>VIRTUAL STARTUP JOURNEY</span><span>{percent}%</span></div></div><div className="journey-dots">{STAGES.map((x,i)=><button key={x[0]} className={i===index?"active":""} onClick={()=>go(i)}>{x[0]}<i/></button>)}</div></div></section>;
+  return <section className="journey" data-tone="ink" id="journey" ref={ref}><div className="journey-sticky"><div className="journey-top"><span>02 / THE JOURNEY</span><span>{s[0]} / 07</span></div><div className="journey-copy"><span className="stage-kicker">{s[1]}</span><span className="stage-number">{s[0]}</span><h2>{s[2]}</h2><p>{s[3]}</p><Link to="/journey">Open your journey <Arrow/></Link></div><div className="journey-image">{STAGES.map((x,i)=><img key={x[0]} src={x[4]} alt="" className={i===index?"active":""} loading="lazy" decoding="async"/>) }<div className="journey-shade"/><div className="journey-image-meta"><span>VIRTUAL STARTUP JOURNEY</span><span>{percent}%</span></div></div><div className="journey-dots">{STAGES.map((x,i)=><button key={x[0]} className={i===index?"active":""} onClick={()=>go(i)}>{x[0]}<i/></button>)}</div></div></section>;
 }
 
 function Sphere() {
   const ref=useRef<HTMLElement>(null), cards=useRef<Array<HTMLDivElement|null>>([]), bg=useRef<HTMLDivElement>(null);
+  const motion=useRef({cur:0,targetX:0,targetY:0,px:0,py:0});
   useEffect(()=>{
-    let raf=0,cur=0,targetX=0,targetY=0,px=0,py=0;
     const move=(e:PointerEvent)=>{
       const el=ref.current;if(!el)return;
       const r=el.getBoundingClientRect();
-      targetX=((e.clientX-r.left)/r.width-.5)*14;
-      targetY=((e.clientY-r.top)/r.height-.5)*10;
+      motion.current.targetX=((e.clientX-r.left)/r.width-.5)*14;
+      motion.current.targetY=((e.clientY-r.top)/r.height-.5)*10;
     };
-    const tick=()=>{
-      const el=ref.current;
-      if(!el){raf=requestAnimationFrame(tick);return}
-      const r=el.getBoundingClientRect();
-      const total=Math.max(el.offsetHeight-window.innerHeight,1);
-      const scrollTarget=Math.min(Math.max(-r.top/total,0),1);
-      cur+=(scrollTarget-cur)*.075;
-      px+=(targetX-px)*.055; py+=(targetY-py)*.055;
+    window.addEventListener("pointermove",move,{passive:true});
+    return()=>window.removeEventListener("pointermove",move);
+  },[]);
+  useSectionFrame(ref,frame=>{
+      const m=motion.current;
+      const scrollTarget=progressOf(frame);
+      m.cur+=(scrollTarget-m.cur)*.075;
+      m.px+=(m.targetX-m.px)*.055; m.py+=(m.targetY-m.py)*.055;
+      const {cur,px,py}=m;
 
       cards.current.forEach((c,i)=>{
         if(!c)return;
@@ -467,12 +455,7 @@ function Sphere() {
         bg.current.style.setProperty("--bx",`${px*.6}px`);
         bg.current.style.setProperty("--by",`${py*.6}px`);
       }
-      raf=requestAnimationFrame(tick);
-    };
-    window.addEventListener("pointermove",move,{passive:true});
-    raf=requestAnimationFrame(tick);
-    return()=>{window.removeEventListener("pointermove",move);cancelAnimationFrame(raf)};
-  },[]);
+  });
   return <section className="sphere" data-tone="ink" ref={ref}>
     <div className="sphere-sticky">
       <div className="sphere-top"><span>03 / THREE LENSES</span><span>SCROLL — THE SYSTEM ROTATES WITH YOU</span></div>
@@ -497,7 +480,7 @@ function Sphere() {
       <div className="sphere-cards">
         {[["PROBLEM",IMG.people],["BUILD",IMG.prototype],["IMPACT",IMG.founders]].map(([title,img],i)=>
           <div key={title} className="sphere-card" ref={n=>{cards.current[i]=n}}>
-            <img src={img as string} alt=""/>
+            <img src={img as string} alt="" loading="lazy" decoding="async"/>
             <div className="sphere-overlay"/>
             <span className="sphere-card-no">0{i+1}</span>
             <div><small>{title}</small><b>{title==="PROBLEM"?"What deserves to exist?":title==="BUILD"?"What can we make real?":"What survives outside the room?"}</b></div>
@@ -509,15 +492,15 @@ function Sphere() {
   </section>;
 }
 function Hubs() {
-  const [active,setActive]=useState(0);return <section className="hubs light" data-tone="paper"><Reveal className="hubs-head"><span className="chapter-label dark">04 / ENTRY POINTS</span><h2>THREE DOORS.<br/><i>ONE SYSTEM.</i></h2><p>Different starts. Same underlying journey from problem to proof.</p></Reveal><div className="hub-layout" data-reveal><div className="hub-list">{HUBS.map((h,i)=><button key={h[0]} className={i===active?"active":""} onMouseEnter={()=>setActive(i)} onClick={()=>setActive(i)}><span>0{i+1}</span><div><small>{h[1]}</small><b>{h[0]}</b></div><Arrow/></button>)}</div><div className="hub-view">{HUBS.map((h,i)=><img key={h[0]} src={h[3]} alt="" className={i===active?"active":""}/>)}<div><span>{HUBS[active][1]}</span><h3>{HUBS[active][2]}</h3><Link className="hub-enter" to={HUBS[active][4]}>Enter {HUBS[active][0]} <Arrow/></Link></div></div></div></section>;
+  const [active,setActive]=useState(0);return <section className="hubs light" data-tone="paper"><Reveal className="hubs-head"><span className="chapter-label dark">04 / ENTRY POINTS</span><h2>THREE DOORS.<br/><i>ONE SYSTEM.</i></h2><p>Different starts. Same underlying journey from problem to proof.</p></Reveal><div className="hub-layout" data-reveal><div className="hub-list">{HUBS.map((h,i)=><button key={h[0]} className={i===active?"active":""} onMouseEnter={()=>setActive(i)} onClick={()=>setActive(i)}><span>0{i+1}</span><div><small>{h[1]}</small><b>{h[0]}</b></div><Arrow/></button>)}</div><div className="hub-view">{HUBS.map((h,i)=><img key={h[0]} src={h[3]} alt="" className={i===active?"active":""} loading="lazy" decoding="async"/>)}<div><span>{HUBS[active][1]}</span><h3>{HUBS[active][2]}</h3><Link className="hub-enter" to={HUBS[active][4]}>Enter {HUBS[active][0]} <Arrow/></Link></div></div></div></section>;
 }
 
 function WorkField() {
-  const ref=useRef<HTMLDivElement>(null);useEffect(()=>{const el=ref.current;if(!el)return;const ns=Array.from(el.querySelectorAll<HTMLElement>("[data-depth]"));const move=(e:PointerEvent)=>{const r=el.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;ns.forEach(n=>{const d=Number(n.dataset.depth||0);n.style.transform=`translate3d(${x*d}px,${y*d}px,0) rotate(${x*d*.03}deg)`})};const leave=()=>ns.forEach(n=>n.style.transform="translate3d(0,0,0)");el.addEventListener("pointermove",move);el.addEventListener("pointerleave",leave);return()=>{el.removeEventListener("pointermove",move);el.removeEventListener("pointerleave",leave)}},[]);return <section className="work-field light" data-tone="paper" ref={ref}><div className="work-top"><span>05 / THE WORK</span><span>THE MESSY MIDDLE</span></div><div className="work-word">BUILD</div><div className="work-pic wp-a" data-depth="52"><img src={IMG.prototype} alt=""/></div><div className="work-pic wp-b" data-depth="-36"><img src={IMG.research} alt=""/></div><div className="work-pic wp-c" data-depth="25"><img src={IMG.pitch} alt=""/></div><div className="work-pic wp-d" data-depth="-49"><img src={IMG.founders} alt=""/></div><span className="work-note wn-a" data-depth="25">question → evidence</span><span className="work-note wn-b" data-depth="-18">prototype / 04</span><span className="work-note wn-c" data-depth="33">iteration / 07</span><div className="work-rule"/><div className="work-caption"><span>THE THING THAT LOOKS LIKE A STARTUP<br/>IS USUALLY A COLLECTION OF ITERATIONS.</span><span>VJ / WORK LOG</span></div></section>;
+  const ref=useRef<HTMLDivElement>(null);useEffect(()=>{const el=ref.current;if(!el)return;const ns=Array.from(el.querySelectorAll<HTMLElement>("[data-depth]"));const move=(e:PointerEvent)=>{const r=el.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;ns.forEach(n=>{const d=Number(n.dataset.depth||0);n.style.transform=`translate3d(${x*d}px,${y*d}px,0) rotate(${x*d*.03}deg)`})};const leave=()=>ns.forEach(n=>n.style.transform="translate3d(0,0,0)");el.addEventListener("pointermove",move);el.addEventListener("pointerleave",leave);return()=>{el.removeEventListener("pointermove",move);el.removeEventListener("pointerleave",leave)}},[]);return <section className="work-field light" data-tone="paper" ref={ref}><div className="work-top"><span>05 / THE WORK</span><span>THE MESSY MIDDLE</span></div><div className="work-word">BUILD</div><div className="work-pic wp-a" data-depth="52"><img src={IMG.prototype} alt="" loading="lazy" decoding="async"/></div><div className="work-pic wp-b" data-depth="-36"><img src={IMG.research} alt="" loading="lazy" decoding="async"/></div><div className="work-pic wp-c" data-depth="25"><img src={IMG.pitch} alt="" loading="lazy" decoding="async"/></div><div className="work-pic wp-d" data-depth="-49"><img src={IMG.founders} alt="" loading="lazy" decoding="async"/></div><span className="work-note wn-a" data-depth="25">question → evidence</span><span className="work-note wn-b" data-depth="-18">prototype / 04</span><span className="work-note wn-c" data-depth="33">iteration / 07</span><div className="work-rule"/><div className="work-caption"><span>THE THING THAT LOOKS LIKE A STARTUP<br/>IS USUALLY A COLLECTION OF ITERATIONS.</span><span>VJ / WORK LOG</span></div></section>;
 }
 
 function Ventures() {
-  const [active,setActive]=useState(0), v=VENTURES[active];return <section className="ventures light" data-tone="paper" id="ventures"><Reveal className="ventures-head"><span className="chapter-label dark">06 / PROOF</span><h2>IDEAS THAT<br/><i>MOVED.</i></h2><p>Selected ventures and technologies already moving through the ecosystem.</p></Reveal><div className="venture-stage" data-reveal><div className="venture-menu">{VENTURES.map((x,i)=><button key={x[0]} className={i===active?"active":""} onClick={()=>setActive(i)}><span>{x[0]}</span><div><small>{x[1]}</small><b>{x[2]}</b></div><Arrow/></button>)}</div><div className="venture-image"><img src={v[4]} alt="" key={v[0]}/><div><span>{v[1]}</span><span>{v[0]} / 03</span></div></div><div className="venture-copy"><span className="kicker dark">{v[1]}</span><h3>{v[2]}</h3><p>{v[3]}</p><Link to="/startups">Explore the build <Arrow/></Link></div></div></section>;
+  const [active,setActive]=useState(0), v=VENTURES[active];return <section className="ventures light" data-tone="paper" id="ventures"><Reveal className="ventures-head"><span className="chapter-label dark">06 / PROOF</span><h2>IDEAS THAT<br/><i>MOVED.</i></h2><p>Selected ventures and technologies already moving through the ecosystem.</p></Reveal><div className="venture-stage" data-reveal><div className="venture-menu">{VENTURES.map((x,i)=><button key={x[0]} className={i===active?"active":""} onClick={()=>setActive(i)}><span>{x[0]}</span><div><small>{x[1]}</small><b>{x[2]}</b></div><Arrow/></button>)}</div><div className="venture-image"><img src={v[4]} alt="" key={v[0]} loading="lazy" decoding="async"/><div><span>{v[1]}</span><span>{v[0]} / 03</span></div></div><div className="venture-copy"><span className="kicker dark">{v[1]}</span><h3>{v[2]}</h3><p>{v[3]}</p><Link to="/startups">Explore the build <Arrow/></Link></div></div></section>;
 }
 
 function Network() {
@@ -530,18 +513,8 @@ function Network() {
   const nodes=useRef<Array<HTMLSpanElement|null>>([]);
   const labels=["STUDENTS","PROBLEMS","RESEARCH","MENTORS","INDUSTRY","CAPITAL","CAMPUS"];
 
-  useEffect(()=>{
-    let raf=0;
-    const tick=()=>{
-      const section=sectionRef.current;
-      if(!section){
-        raf=requestAnimationFrame(tick);
-        return;
-      }
-
-      const rect=section.getBoundingClientRect();
-      const travel=Math.max(section.offsetHeight-window.innerHeight,1);
-      const p=Math.min(Math.max(-rect.top/travel,0),1);
+  useSectionFrame(sectionRef,frame=>{
+      const p=progressOf(frame);
       const open=Math.min(Math.max((p-.30)/.56,0),1);
       const eased=1-Math.pow(1-open,3);
 
@@ -566,13 +539,7 @@ function Network() {
         node.style.transform=`translate3d(0,${direction*amount}px,0)`;
         node.style.opacity=String(.42+eased*.48);
       });
-
-      raf=requestAnimationFrame(tick);
-    };
-
-    raf=requestAnimationFrame(tick);
-    return()=>cancelAnimationFrame(raf);
-  },[]);
+  });
 
   useEffect(()=>{
     const clear=()=>{
@@ -710,12 +677,11 @@ function PageField(){
     const measure=()=>{
       marks=Array.from(document.querySelectorAll<HTMLElement>("[data-tone]")).map(el=>({top:el.getBoundingClientRect().top+window.scrollY,tone:el.dataset.tone||"ink"}));
     };
-    measure();
-    document.fonts?.ready.then(measure);
-    const ro=new ResizeObserver(measure);
-    ro.observe(document.body);
     let raf=0,applied="";
+    const schedule=()=>{if(!raf)raf=requestAnimationFrame(tick)};
+    const remeasure=()=>{measure();schedule()};
     const tick=()=>{
+      raf=0;
       if(marks.length&&ref.current){
         const focus=window.scrollY+window.innerHeight*.5;
         const w=window.innerHeight*.6;
@@ -728,10 +694,13 @@ function PageField(){
         }
         if(color!==applied){ref.current.style.backgroundColor=color;applied=color;}
       }
-      raf=requestAnimationFrame(tick);
     };
-    raf=requestAnimationFrame(tick);
-    return()=>{ro.disconnect();cancelAnimationFrame(raf)};
+    remeasure();
+    document.fonts?.ready.then(remeasure);
+    const ro=new ResizeObserver(remeasure);
+    ro.observe(document.body);
+    window.addEventListener("scroll",schedule,{passive:true});
+    return()=>{ro.disconnect();window.removeEventListener("scroll",schedule);cancelAnimationFrame(raf)};
   },[]);
   return <div className="page-field" ref={ref} aria-hidden="true"/>;
 }
@@ -746,13 +715,16 @@ export default function Landing(){
   },[]);
   useEffect(()=>{
     let raf=0;
-    const tick=()=>{
-      const max=document.documentElement.scrollHeight-window.innerHeight;
-      if(progressRef.current)progressRef.current.style.transform=`scaleX(${max>0?window.scrollY/max:0})`;
-      raf=requestAnimationFrame(tick);
+    const paint=()=>{
+      raf=0;
+      const {scrollMax}=pageMetrics();
+      if(progressRef.current)progressRef.current.style.transform=`scaleX(${scrollMax>0?window.scrollY/scrollMax:0})`;
     };
-    raf=requestAnimationFrame(tick);
-    return()=>cancelAnimationFrame(raf);
+    const schedule=()=>{if(!raf)raf=requestAnimationFrame(paint)};
+    const stop=onMeasure(schedule);
+    window.addEventListener("scroll",schedule,{passive:true});
+    schedule();
+    return()=>{stop();window.removeEventListener("scroll",schedule);cancelAnimationFrame(raf)};
   },[]);
   return <div className="vj-landing"><Intro/><Cursor/><SmoothScroll/><PageField/><div className="global-progress"><span ref={progressRef}/></div><SiteNav overlay brandHref="#top"/><main><Hero/><section className="statement dark" data-tone="ink"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark" data-tone="ink"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>{String(counters.funded).padStart(2,"0")}</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" data-tone="pink" id="contact">
   <div className="contact-v13-back" aria-hidden="true">

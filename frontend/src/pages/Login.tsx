@@ -1,4 +1,4 @@
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { BrandMark } from "@/components/site/SiteChrome";
 import "@/components/design-system/page-hero.css";
 import { Link, useNavigate } from "react-router-dom";
@@ -70,4 +70,12 @@ const Login = () => {
   );
 };
 
-export default Login;
+// The Google Identity script is ~100 KB and only this page needs it, so the provider lives
+// here instead of wrapping the whole app.
+const LoginPage = () => (
+  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT ?? ""}>
+    <Login />
+  </GoogleOAuthProvider>
+);
+
+export default LoginPage;
