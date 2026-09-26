@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import type { CSSProperties } from "react";
+import { useUser } from "@/pages/UserContext";
+import "@/components/design-system/listing.css";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +11,7 @@ import ExploreProblemsModal from "@/components/ExploreProblemsModal";
 import { PageHero } from "@/components/design-system/PageHero";
 
 const Programs = () => {
+  const { user } = useUser();
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active':
@@ -74,97 +78,56 @@ const Programs = () => {
   };
 
   return (
-    <div className="page-shell bg-vj-neutral/30">
+    <div className="page-shell lx" style={{ "--lx-accent": "var(--lime)" } as CSSProperties}>
       <PageHero
         eyebrow="Programs"
         title="VNRVJIET Startup Programs"
         description="Comprehensive ecosystem of programs, workshops, and initiatives designed to nurture student entrepreneurship."
         stats={[
-          { value: String(startupPrograms.length), label: "Programs", icon: Trophy },
-          { value: "All students", label: "Welcome", icon: Users },
-          { value: "1 hour to 2 months", label: "Program duration", icon: Clock },
+          { value: String(startupPrograms.length), label: "Programs" },
+          { value: "All students", label: "Welcome" },
+          { value: "1 hour to 2 months", label: "Program duration" },
         ]}
-        backgroundClassName="bg-[hsl(var(--background-secondary))] relative min-h-[420px] md:min-h-[520px]"
       />
 
-      <section className="page-section">
-        <div className="section-container space-y-12">
-        {Object.entries(groupedPrograms).map(([category, programs]) => (
-          <div key={category} className="mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-vj-primary mb-8">
-              {categoryTitles[category as keyof typeof categoryTitles] || category}
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section className="lx-section">
+        {Object.entries(groupedPrograms).map(([category, programs], sectionIndex) => (
+          <div key={category} className="lx-block">
+            <div className="lx-sec-head">
+              <span>{String(sectionIndex + 1).padStart(2, "0")} / {programs.length} program{programs.length > 1 ? "s" : ""}</span>
+              <h2>{categoryTitles[category as keyof typeof categoryTitles] || category}</h2>
+            </div>
+            <div className="lx-grid">
               {programs.map((program) => (
-                <Card key={program.id} className="group hover:-translate-y-1 hover:shadow-[var(--vj-shadow-card)] transition-all duration-300">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <Badge className={`${getCategoryColor(program.category)} border-0`}>
-                        {program.category}
-                      </Badge>
-                      <div className="flex items-center gap-1 text-sm">
-                        {getStatusIcon(program.status)}
-                        <span className="text-gray-600 dark:text-gray-300">
-                          {getStatusText(program.status)}
-                        </span>
-                      </div>
+                <article key={program.id} className="lx-card">
+                  <Link to={`/programs/${program.id}`} className="lx-card-link" aria-label={program.title} />
+                  <div className="lx-card-body">
+                    <div className="lx-card-status">
+                      <span>{program.category}{program.edition ? ` / #${program.edition}` : ""}</span>
+                      <b className={`is-${program.status}`}>{getStatusText(program.status)}</b>
                     </div>
-                    
-                    <CardTitle className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
-                      {program.title}
-                      {program.edition && (
-                        <span className="text-sm font-normal text-gray-500 ml-2">
-                          #{program.edition}
-                        </span>
-                      )}
-                    </CardTitle>
-                    
-                    <CardDescription className="text-gray-600 dark:text-gray-300 font-medium">
-                      {program.subtitle}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0">
-                    <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
-                      {program.shortDescription}
-                    </p>
-                    
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-1 text-sm text-gray-500">
-                        <Calendar className="h-4 w-4" />
-                        <span>{program.duration}</span>
-                      </div>
+                    <h3 className="lx-card-title">{program.title}</h3>
+                    <p className="lx-card-tagline">{program.subtitle}</p>
+                    <p className="lx-card-text">{program.shortDescription}</p>
+                    <div className="lx-card-meta">
+                      <span>{program.duration}</span>
+                      <em>Details ↗</em>
                     </div>
-                    
-                    <Link to={`/programs/${program.id}`}>
-                      <Button className="w-full group/btn">
-                        Learn More
-                        <ArrowRight className="h-4 w-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
+                  </div>
+                </article>
               ))}
             </div>
           </div>
         ))}
-        <div className="section-panel p-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-vj-primary mb-4">
-            Ready to Start Your Entrepreneurial Journey?
-          </h2>
-          <p className="text-lg text-vj-muted mb-8">
-            Join our thriving startup community and transform your ideas into reality
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="min-h-[44px]">Contact Innovation Cell</Button>
-            <ExploreProblemsModal>
-              <Button size="lg" variant="outline" className="min-h-[44px] w-full sm:w-auto">
-                Explore Problems
-              </Button>
-            </ExploreProblemsModal>
+
+        <div className="lx-gate">
+          <span>Your move</span>
+          <h2>Ready to start <em>building?</em></h2>
+          <p>Join the startup community and turn your ideas into something real.</p>
+          <div className="lx-gate-actions">
+            <a href="mailto:head.iie@vnrvjiet.in" className="lx-cta">Contact the innovation cell ↗</a>
+            <Link to={user ? "/problems" : "/login"} className="lx-textbtn">Explore problems ↗</Link>
           </div>
-        </div>
         </div>
       </section>
     </div>
