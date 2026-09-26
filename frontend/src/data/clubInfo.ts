@@ -1127,3 +1127,11 @@ export const getAllTeamMembers = (): TeamMember[] => {
   });
   return allMembers;
 };
+
+// The contactEmail addresses above are on vjstartups.vnrvjiet.in, which has no DNS record, so
+// mail sent to them bounces. Until those inboxes exist, enquiries go to the innovation cell
+// with the wing or program named in the subject.
+export const wingDisplayName = (name: string) => name.replace(/\s*🪽/u, "").trim();
+
+export const clubContactHref = (topic: string) =>
+  `mailto:head.iie@vnrvjiet.in?subject=${encodeURIComponent(`${wingDisplayName(topic)} enquiry`)}`;

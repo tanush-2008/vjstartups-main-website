@@ -48,7 +48,7 @@
 .lx-card:hover .lx-card-title{color:var(--lx-accent)}
 .lx-card-text{display:-webkit-box;margin:0;overflow:hidden;color:hsl(var(--muted-foreground));font-size:13px;line-height:1.55;-webkit-line-clamp:4;-webkit-box-orient:vertical}
 .lx-card-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;padding-top:14px;border-top:1px solid rgba(247,245,239,.08);color:hsl(var(--muted-foreground));font:9px var(--mono);letter-spacing:.12em;text-transform:uppercase}
-.lx-card-meta em{font-style:normal;color:var(--lx-accent)}
+.lx-card-meta em{font-style:normal;color:var(--lx-accent);white-space:nowrap}
 .lx-card-link{position:absolute;inset:0;z-index:1}
 .lx-card-link:focus-visible{outline:2px solid var(--lx-accent);outline-offset:-2px;border-radius:22px}
 

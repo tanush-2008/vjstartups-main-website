@@ -15,6 +15,7 @@ interface UseTeamMembersFromSheetOptions {
 
 interface UseTeamMembersFromSheetResult {
   groups: TeamDirectoryGroup[];
+  allGroups: TeamDirectoryGroup[];
   wings: string[];
   isLoading: boolean;
   error: string | null;
@@ -70,13 +71,16 @@ export function useTeamMembersFromSheet(
 
   const wings = useMemo(() => getAvailableWings(members), [members]);
 
-  const groups = useMemo(() => {
-    const grouped = groupMembersByWing(members);
-    return filterGroupsByWing(grouped, selectedWing);
-  }, [members, selectedWing]);
+  const allGroups = useMemo(() => groupMembersByWing(members), [members]);
+
+  const groups = useMemo(
+    () => filterGroupsByWing(allGroups, selectedWing),
+    [allGroups, selectedWing]
+  );
 
   return {
     groups,
+    allGroups,
     wings,
     isLoading,
     error,
