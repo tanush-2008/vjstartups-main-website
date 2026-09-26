@@ -55,7 +55,11 @@ const ClubPage = () => {
 
   return (
     <div className="page-shell lx cl" style={{ "--lx-accent": "var(--lime)" } as CSSProperties}>
-      <ClubHero onExploreWings={() => goTo("wings")} onGetInvolved={() => goTo("join")} />
+      <ClubHero
+        onExploreWings={() => goTo("wings")}
+        onGetInvolved={() => goTo("join")}
+        onOpenWing={(id) => goTo("wings", `wing-${id}`)}
+      />
 
       <TabsPrimitive.Root value={activeTab} onValueChange={setActiveTab}>
         {/* Scroll target sits outside the sticky bar: a stuck element can't be scrolled to reliably. */}

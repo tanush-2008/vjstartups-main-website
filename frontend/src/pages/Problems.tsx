@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Search, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import UpvoteButton from "@/components/UpvoteButton";
 import { PageHero } from "@/components/design-system/PageHero";
+import { TitleMarquee } from "@/components/design-system/HeroSignatures";
+import { isReadableTitle } from "@/utils/readableTitle";
 import "@/components/design-system/listing.css";
 import axios from "axios";
 import { useUser } from "../pages/UserContext"; 
@@ -273,6 +275,16 @@ const handleUpvote = async (problemId: string) => {
           { value: String(selectedTags.length), label: "Active tags" },
         ]}
         primaryAction={{ label: "Submit a problem", to: "/submit-problem", icon: Plus }}
+        layout="center"
+        accent="pink"
+        signature={
+          <TitleMarquee
+            items={allProblems
+              .filter((p) => p.title && isReadableTitle(p.title))
+              .slice(0, 28)
+              .map((p) => ({ title: p.title.trim(), href: `/problems/${p.problemId}` }))}
+          />
+        }
       />
 
       <section className="lx-section">

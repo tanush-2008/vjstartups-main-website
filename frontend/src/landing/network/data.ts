@@ -1,4 +1,5 @@
 import { getIdeaNavigationSlug } from "@/utils/slugUtils";
+import { isReadableTitle } from "@/utils/readableTitle";
 
 // Real records for the network scene. Every point the scene draws for a problem or idea is one
 // of these; decorative dust is drawn separately and is never hoverable or counted.
@@ -18,14 +19,8 @@ export type NetItem = {
 
 export type NetData = { items: NetItem[]; problems: number; ideas: number };
 
-const JUNK = /\b(test|testing|dummy|asdf|qwerty|sample|demo|lorem|ipsum|xyz|abc)\b/i;
-
-// Student submissions include placeholders like "dsa" or one-word entries. Those stay as
-// unlabelled points.
-const isReadable = (title: string) => {
-  const t = title.trim();
-  return t.length >= 10 && t.split(/\s+/).length >= 2 && !JUNK.test(t) && !/(.)\1{3,}/.test(t);
-};
+// Titles like "dsa" stay as unlabelled points.
+const isReadable = isReadableTitle;
 
 const withTimeout = <T,>(p: Promise<T>, ms: number) =>
   Promise.race([p, new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))]);

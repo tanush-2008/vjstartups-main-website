@@ -29,6 +29,13 @@ interface PageHeroProps {
   backLink?: { label: string; to: string };
   backgroundClassName?: string;
   children?: ReactNode;
+  /** Each page gets its own composition: left (default), centred, split (with `side`) or stack. */
+  layout?: "left" | "center" | "split" | "stack";
+  accent?: "lime" | "pink" | "violet";
+  /** Left column for the split layout. */
+  side?: ReactNode;
+  /** Full-bleed band under the header, built from the page's own content. */
+  signature?: ReactNode;
 }
 
 function splitTitle(title: string) {
@@ -47,6 +54,10 @@ export function PageHero({
   backLink,
   backgroundClassName,
   children,
+  layout = "left",
+  accent: accentColor = "lime",
+  side,
+  signature,
 }: PageHeroProps) {
   const { lead, accent } = splitTitle(title);
 
@@ -66,7 +77,7 @@ export function PageHero({
   };
 
   return (
-    <section className={cn("ph", backgroundClassName)}>
+    <section className={cn("ph", `ph--${layout}`, backgroundClassName)} data-accent={accentColor}>
       <div className="ph-ghost" aria-hidden="true">{title.split(/\s+/)[0]}</div>
 
       <div className="ph-inner">
@@ -79,6 +90,9 @@ export function PageHero({
           <span>{backLink && eyebrow ? eyebrow : "VJ Startups / Hyderabad"}</span>
         </div>
 
+        <div className="ph-split">
+        {layout === "split" && <div className="ph-side">{side}</div>}
+        <div className="ph-main">
         <h1 className="ph-title">
           <span className="sr-only">{title}</span>
           {lead.split(" ").map((word, i) => (
@@ -104,6 +118,8 @@ export function PageHero({
             </div>
           )}
         </div>
+        </div>
+        </div>
 
         {stats && stats.length > 0 && (
           <dl className="ph-stats">
@@ -118,6 +134,7 @@ export function PageHero({
 
         {children && <div className="ph-extra">{children}</div>}
       </div>
+      {signature && <div className="ph-signature">{signature}</div>}
     </section>
   );
 }

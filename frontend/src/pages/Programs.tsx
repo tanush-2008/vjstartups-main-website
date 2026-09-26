@@ -4,6 +4,7 @@ import { useUser } from "@/pages/UserContext";
 import "@/components/design-system/listing.css";
 import { startupPrograms, StartupProgram } from "@/data/startupPrograms";
 import { PageHero } from "@/components/design-system/PageHero";
+import { ProgramStrip } from "@/components/design-system/HeroSignatures";
 
 const Programs = () => {
   const { user } = useUser();
@@ -49,6 +50,11 @@ const Programs = () => {
           { value: "All students", label: "Welcome" },
           { value: "1 hour to 2 months", label: "Program duration" },
         ]}
+        signature={
+          <ProgramStrip
+            items={startupPrograms.map((p) => ({ id: p.id, title: p.title, meta: p.duration, status: p.status }))}
+          />
+        }
       />
 
       <section className="lx-section">

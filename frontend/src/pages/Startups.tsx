@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Plus, Search } from "lucide-react";
 import StartupCard from "@/components/StartupCard";
 import { PageHero } from "@/components/design-system/PageHero";
+import { StageSignal } from "@/components/design-system/HeroSignatures";
 import "@/components/design-system/listing.css";
 import { fetchStartups } from "@/services/startupsService";
 import { StartupListItem, StartupSortOption } from "@/types/startup";
@@ -154,6 +155,13 @@ const Startups = () => {
         ]}
         primaryAction={{ label: "Submit a startup", to: submitTo, icon: Plus }}
         secondaryAction={{ label: "Explore problems", to: "/problems", variant: "outline" }}
+        layout="stack"
+        accent="violet"
+        signature={
+          <StageSignal
+            counts={Array.from({ length: 9 }, (_, i) => startups.filter((s) => (s.stage ?? 0) === i + 1).length)}
+          />
+        }
       />
 
       <section className="lx-section">

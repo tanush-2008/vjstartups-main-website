@@ -1,17 +1,19 @@
 /* Editorial page header shared by the platform pages, echoing the landing's section heads. */
-.ph{position:relative;overflow:hidden;border-bottom:1px solid hsl(var(--border));background:hsl(var(--background))}
-.ph:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 12% 0%,rgba(215,255,99,.07),transparent 42%)}
+.ph{--ph-accent:var(--lime);position:relative;overflow:hidden;border-bottom:1px solid hsl(var(--border));background:hsl(var(--background))}
+.ph[data-accent="pink"]{--ph-accent:var(--pink)}
+.ph[data-accent="violet"]{--ph-accent:var(--violet)}
+.ph:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 12% 0%,color-mix(in srgb,var(--ph-accent) 8%,transparent),transparent 42%)}
 .ph-ghost{position:absolute;right:-2vw;bottom:-4vw;color:rgba(247,245,239,.028);font-size:clamp(140px,22vw,360px);font-weight:800;line-height:.7;letter-spacing:-.12em;text-transform:uppercase;white-space:nowrap;pointer-events:none;user-select:none}
 .ph-inner{position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:clamp(56px,8vw,112px) 7vw clamp(40px,5vw,64px)}
 
 .ph-meta{display:flex;justify-content:space-between;gap:24px;color:hsl(var(--muted-foreground));font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase}
 .ph-eyebrow{display:inline-flex;align-items:center;gap:10px;color:var(--white)}
-.ph-eyebrow:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--lime)}
+.ph-eyebrow:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ph-accent)}
 .ph-back{color:var(--white);text-decoration:none;transition:color .2s}
-.ph-back:hover{color:var(--lime)}
+.ph-back:hover{color:var(--ph-accent)}
 
 .ph .ph-title{margin:28px 0 0;color:var(--white);font-size:clamp(52px,8.2vw,136px);font-weight:800;line-height:.84;letter-spacing:-.085em;text-transform:uppercase;overflow-wrap:anywhere}
-.ph-title em{font-style:normal;color:var(--lime)}
+.ph-title em{font-style:normal;color:var(--ph-accent)}
 
 .ph-foot{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:32px;margin-top:36px}
 .ph-desc{max-width:460px;margin:0;color:hsl(var(--muted-foreground));font-size:14px;line-height:1.55}
@@ -20,7 +22,7 @@
 .ph-stats{display:flex;flex-wrap:wrap;margin:48px 0 0;border-top:1px solid hsl(var(--border))}
 .ph-stats>div{flex:1 1 180px;padding:18px 24px 0 0}
 .ph-stats dt{display:flex;gap:10px;color:hsl(var(--muted-foreground));font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase}
-.ph-stats dt span{color:var(--lime)}
+.ph-stats dt span{color:var(--ph-accent)}
 .ph-stats dd{margin:8px 0 0;color:var(--white);font-size:clamp(28px,3.4vw,48px);font-weight:800;line-height:1;letter-spacing:-.06em}
 .ph-extra{margin-top:32px}
 
@@ -72,3 +74,38 @@
   .ph-w>span,.ph-w>em,.ph-meta,.ph-desc,.ph-actions,.ph-stats>div,.ph-extra,.ph-note,.ph-ghost{animation:none;opacity:1;transform:none}
 }
 
+
+/* --- Per-page compositions ---------------------------------------------------------------- */
+.ph-signature{position:relative;z-index:1;padding-bottom:clamp(32px,4vw,56px);opacity:0;animation:ph-fade 1s cubic-bezier(.2,.7,.2,1) .55s forwards}
+.pt-busy .ph-signature{animation-play-state:paused}
+
+/* Centre: a statement, not a document header. */
+.ph--center .ph-title{text-align:center}
+.ph--center .ph-foot{grid-template-columns:1fr;justify-items:center;text-align:center}
+.ph--center .ph-desc{max-width:520px}
+.ph--center .ph-actions{justify-content:center}
+.ph--center .ph-stats{justify-content:center}
+.ph--center .ph-stats>div{flex:0 0 auto;padding:18px clamp(20px,3vw,48px) 0;text-align:center}
+.ph--center .ph-stats dd{white-space:nowrap}
+.ph--center .ph-extra{display:flex;justify-content:center}
+.ph--center .ph-extra .lx-gate-actions{justify-content:center}
+.ph--center .ph-stats dt{justify-content:center}
+.ph--center .ph-ghost{left:50%;right:auto;bottom:-6vw;translate:-50% 0}
+
+/* Split: the page's own figure on the left, the title answering it on the right. */
+.ph--split .ph-split{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:5vw;align-items:end;margin-top:28px}
+.ph--split .ph .ph-title,.ph--split .ph-title{margin-top:0;text-align:right}
+.ph--split .ph-foot{grid-template-columns:1fr;justify-items:end;text-align:right}
+.ph--split .ph-actions{justify-content:flex-end}
+.ph--split .ph-ghost{right:auto;left:-3vw}
+
+/* Stack: one oversized word that owns the page. */
+.ph--stack .ph-title{font-size:clamp(84px,15vw,250px);line-height:.78}
+.ph--stack .ph-ghost{display:none}
+
+@media(max-width:800px){
+  .ph--split .ph-split{grid-template-columns:1fr;gap:28px}
+  .ph--split .ph-title,.ph--split .ph-foot{text-align:left;justify-items:start}
+  .ph--split .ph-actions{justify-content:flex-start}
+}
+@media(prefers-reduced-motion:reduce){.ph-signature{animation:none;opacity:1}}

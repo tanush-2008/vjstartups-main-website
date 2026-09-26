@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Search, Plus } from "lucide-react";
 import IdeaCard from "@/components/IdeaCardCompact";
 import { PageHero } from "@/components/design-system/PageHero";
+import { BigCount } from "@/components/design-system/HeroSignatures";
 import "@/components/design-system/listing.css";
 import axios from "axios";
 import { useUser } from "./UserContext";
@@ -241,11 +242,12 @@ const Ideas = () => {
           : "Discover innovative solutions being developed by student entrepreneurs across all problem areas"
         }
         stats={[
-          { value: String(ideas.length), label: "Ideas total" },
           { value: String(filteredIdeas.length), label: "Visible ideas" },
           { value: String(tagsWithCounts.length), label: "Popular tags" },
         ]}
         primaryAction={user ? { label: "Submit an idea", to: "/submit-idea", icon: Plus } : undefined}
+        layout="split"
+        side={<BigCount value={ideas.length} label={ideas.length === 1 ? "Idea taking shape" : "Ideas taking shape"} />}
       />
 
       <section className="lx-section">
