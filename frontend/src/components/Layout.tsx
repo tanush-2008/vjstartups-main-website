@@ -2,6 +2,7 @@ import { ReactNode, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import { SiteNav, SiteFooter } from "./site/SiteChrome";
 import { ScrollReveal } from "./site/ScrollReveal";
+import { SiteCursor } from "./site/SiteCursor";
 import FloatingActionButton from "./FloatingActionButton";
 
 interface LayoutProps {
@@ -25,6 +26,7 @@ const Layout = ({ children }: LayoutProps) => {
       <SiteFooter />
       <FloatingActionButton />
       <ScrollReveal />
+      <SiteCursor />
     </div>
   );
 };
