@@ -31,7 +31,7 @@ const ClubPage = () => {
 
       <div className="container mx-auto px-4 py-10 md:py-14">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-10">
-          <div className="sticky top-16 z-20 -mx-4 bg-background/85 px-4 py-3 backdrop-blur-md md:static md:mx-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+          <div className="sticky top-[69px] z-20 -mx-4 bg-background/85 px-4 py-3 backdrop-blur-md md:static md:mx-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
             <TabsList
               className={cn(
                 "flex h-auto w-full gap-1.5 overflow-x-auto rounded-vj-large border border-vj-border bg-vj-surface p-1.5 shadow-[var(--vj-shadow-subtle)]",

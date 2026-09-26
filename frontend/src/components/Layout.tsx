@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { Outlet } from "react-router-dom";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
+import { SiteNav, SiteFooter } from "./site/SiteChrome";
 import FloatingActionButton from "./FloatingActionButton";
 
 interface LayoutProps {
@@ -11,9 +10,9 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <SiteNav />
       <main className="overflow-x-hidden">{children ?? <Outlet />}</main>
-      <Footer />
+      <SiteFooter />
       <FloatingActionButton />
     </div>
   );

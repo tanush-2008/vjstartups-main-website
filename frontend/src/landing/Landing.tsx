@@ -1,13 +1,12 @@
-import { useEffect, useRef, useState, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import Lenis from "lenis";
 import { useUser } from "@/pages/UserContext";
+import { counters } from "@/data/mockData";
+import { Arrow, Magnetic, SiteFooter, SiteNav } from "@/components/site/SiteChrome";
 import "./landing.css";
 
-const PLANE_ADMIN_URL = import.meta.env.VITE_PLANE_ADMIN_URL || "http://localhost:3001/god-mode/";
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:6220";
-const MENTOR_NETWORK = "/programs/mentorship-program-1?tab=mentors#faculty-mentor-panel";
-const PLATFORM_LINKS = [["Problems", "/problems"], ["Ideas", "/ideas"], ["Startups", "/startups"], ["Programs", "/programs"], ["Club", "/club"]] as const;
 
 const IMG = {
   hero: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=2200&q=92",
@@ -45,22 +44,7 @@ const VENTURES = [
   ["03", "Industrial IoT", "Alltronics IoT Solutions", "Smart IoT and AI-enabled electronic testing, EV battery monitoring, and industrial automation.", IMG.iot],
 ] as const;
 
-function Mark() {
-  return <a className="brand" href="#top" aria-label="VJ Startups"><span className="brand-symbol"><i/><i/><i/><i/><i/><i/></span><span>VJ STARTUPS</span></a>;
-}
-function Arrow() { return <span className="arrow">↗</span>; }
 function Reveal({ children, className="" }: { children: ReactNode; className?: string }) { return <div data-reveal className={className}>{children}</div>; }
-
-function Magnetic({ href, children, variant }: { href:string; children:ReactNode; variant?:"ghost" }) {
-  const ref=useRef<HTMLAnchorElement>(null);
-  const handlers={
-    onMouseMove:(e:ReactMouseEvent)=>{const r=ref.current?.getBoundingClientRect();if(!r||!ref.current)return;ref.current.style.setProperty("--tx",`${((e.clientX-r.left)/r.width-.5)*11}px`);ref.current.style.setProperty("--ty",`${((e.clientY-r.top)/r.height-.5)*11}px`);},
-    onMouseLeave:()=>{ref.current?.style.setProperty("--tx","0px");ref.current?.style.setProperty("--ty","0px");},
-  };
-  const className=`magnetic${variant?` ${variant}`:""}`;
-  if(href.startsWith("/"))return <Link ref={ref} to={href} className={className} {...handlers}>{children}</Link>;
-  return <a ref={ref} href={href} className={className} {...handlers}>{children}</a>;
-}
 
 function Cursor() {
   const blob=useRef<HTMLDivElement>(null), ring=useRef<HTMLDivElement>(null);
@@ -377,9 +361,9 @@ function Hero() {
       </div>
 
       <div className="opening-ribbon" ref={ribbon} aria-hidden="true">
-        <span>35</span><small>STARTUPS</small>
-        <span>87</span><small>FUTURE BUILDERS</small>
-        <span>8</span><small>FUNDED</small>
+        <span>{counters.startups}</span><small>STARTUPS</small>
+        <span>{counters.students}</span><small>FUTURE BUILDERS</small>
+        <span>{counters.funded}</span><small>FUNDED</small>
         <span>15</span><small>RESEARCH PARTNERS</small>
       </div>
       </div>
@@ -678,14 +662,39 @@ function Network() {
         </div>
 
         <div className="network-v16-bottom">
-          <span>35 STARTUPS</span><span>87 FUTURE BUILDERS</span><span>15 RESEARCH PARTNERS</span><span>10+ INDUSTRY MENTORS</span><span>8 FUNDED</span>
+          <span>{counters.startups} STARTUPS</span><span>{counters.students} FUTURE BUILDERS</span><span>15 RESEARCH PARTNERS</span><span>10+ INDUSTRY MENTORS</span><span>{counters.funded} FUNDED</span>
         </div>
       </div>
     </section>
   );
 }
+type StageUnlock={userName:string;stageName:string;completedAt:string};
+
+const since=(iso:string)=>{
+  const hours=Math.max(0,(Date.now()-new Date(iso).getTime())/36e5);
+  if(hours<1)return "now";
+  if(hours<24)return `${Math.floor(hours)}h`;
+  const days=Math.floor(hours/24);
+  return days<7?`${days}d`:`${Math.floor(days/7)}w`;
+};
+
+function useJourneyActivity(){
+  const [data,setData]=useState<{total:number|null;recent:StageUnlock[]}|null>(null);
+  useEffect(()=>{
+    let live=true;
+    fetch(`${API_BASE}/notification-api/stage-notifications/stats`)
+      .then(r=>r.ok?r.json():Promise.reject(r.status))
+      .then(d=>{if(live)setData({total:d.totalCount||0,recent:d.recentNotifications||[]});})
+      .catch(()=>{if(live)setData({total:null,recent:[]});});
+    return()=>{live=false;};
+  },[]);
+  return data;
+}
+
 function Community() {
-  const feed=[["05h","KARTHIK","completed","User Validation"],["08h","BHARGAVI","completed","Problem Discovery"],["12h","BHAVISWA","completed","Prototype Development"],["1d","SRIRAM","completed","Research & Feasibility"]];return <section className="community light" data-tone="paper" id="community"><Reveal className="community-head"><span className="chapter-label dark">08 / IN MOTION</span><h2>THE WORK IS<br/><i>STILL MOVING.</i></h2><p>Startup building isn't a before-and-after story. The interesting part is the work between the milestones.</p></Reveal><div className="feed" data-reveal>{feed.map(([time,name,action,stage],i)=><div className="feed-row" key={name+stage}><span>{time}</span><i/><div><b>{name}</b><span>{action} <em>“{stage}”</em></span></div><small>0{i+1}</small></div>)}</div><div className="community-count" data-reveal><strong>847</strong><span>ENTREPRENEURS<br/>ON THE JOURNEY</span><Link className="community-link" to="/leaderboard">See who&apos;s leading <Arrow/></Link></div></section>;
+  const activity=useJourneyActivity();
+  const feed=activity?.recent.slice(0,4)??[];
+  return <section className="community light" data-tone="paper" id="community"><Reveal className="community-head"><span className="chapter-label dark">08 / IN MOTION</span><h2>THE WORK IS<br/><i>STILL MOVING.</i></h2><p>Startup building isn't a before-and-after story. The interesting part is the work between the milestones.</p></Reveal><div className="feed" data-reveal>{feed.length?feed.map((n,i)=><div className="feed-row" key={n.userName+n.stageName+n.completedAt}><span>{since(n.completedAt)}</span><i/><div><b>{n.userName.toUpperCase()}</b><span>completed <em>“{n.stageName}”</em></span></div><small>0{i+1}</small></div>):<div className="feed-row feed-empty"><span>—</span><i/><div><b>{activity?"NO UNLOCKS YET":"LOADING"}</b><span>{activity?<>Be the first to <Link to="/journey"><em>unlock a stage</em></Link></>:"Reading the journey…"}</span></div><small>00</small></div>}</div><div className="community-count" data-reveal><strong>{activity?.total??"—"}</strong><span>ENTREPRENEURS<br/>ON THE JOURNEY</span><Link className="community-link" to="/leaderboard">See who&apos;s leading <Arrow/></Link></div></section>;
 }
 
 function FAQ() {
@@ -727,32 +736,9 @@ function PageField(){
   return <div className="page-field" ref={ref} aria-hidden="true"/>;
 }
 
-function MobileMenu({ onClose, roleLinks, user, onLogout }:{ onClose:()=>void; roleLinks:ReactNode; user:unknown; onLogout:()=>void }){
-  return <div className="mobile-menu" onClick={e=>{if((e.target as HTMLElement).closest("a,button"))onClose();}}>
-    <nav>
-      {PLATFORM_LINKS.map(([label,to])=><Link key={to} to={to}>{label}</Link>)}
-      <Link to="/journey">Journey</Link>
-      <Link to="/leaderboard">Leaderboard</Link>
-      {roleLinks}
-    </nav>
-    <div className="mobile-menu-foot">
-      {user?<button onClick={onLogout}>LOGOUT</button>:<Link to="/login">LOGIN</Link>}
-      <span>HYDERABAD / IN</span>
-    </div>
-  </div>;
-}
-
 export default function Landing(){
-  const { user, setUser }=useUser();
-  const navigate=useNavigate();
-  const [menuOpen,setMenuOpen]=useState(false);
+  const { user }=useUser();
   const progressRef=useRef<HTMLSpanElement>(null);
-  const [navHidden,setNavHidden]=useState(false);
-  const logout=()=>{setUser(null);navigate("/login");};
-  const roleLinks=<>
-    {(user?.role==="wing_master"||user?.role==="admin")&&<Link to="/announcements/new">Post announcement</Link>}
-    {user?.role==="admin"&&<a href={PLANE_ADMIN_URL} target="_blank" rel="noopener noreferrer">Admin panel</a>}
-  </>;
   useEffect(()=>{
     const observer=new IntersectionObserver(entries=>entries.forEach(e=>e.isIntersecting&&e.target.classList.add("revealed")),{threshold:.07});
     document.querySelectorAll("[data-reveal]").forEach(el=>observer.observe(el));
@@ -760,30 +746,15 @@ export default function Landing(){
   },[]);
   useEffect(()=>{
     let raf=0;
-    let lastY=window.scrollY;
-    let hidden=false;
     const tick=()=>{
-      const y=window.scrollY;
       const max=document.documentElement.scrollHeight-window.innerHeight;
-      if(progressRef.current)progressRef.current.style.transform=`scaleX(${max>0?y/max:0})`;
-
-      const delta=y-lastY;
-      if(y<90){
-        hidden=false;
-      }else if(delta>7){
-        hidden=true;
-      }else if(delta<-7){
-        hidden=false;
-      }
-      setNavHidden(hidden);
-      lastY=y;
+      if(progressRef.current)progressRef.current.style.transform=`scaleX(${max>0?window.scrollY/max:0})`;
       raf=requestAnimationFrame(tick);
     };
-
     raf=requestAnimationFrame(tick);
     return()=>cancelAnimationFrame(raf);
   },[]);
-  return <div className="vj-landing"><Intro/><Cursor/><SmoothScroll/><PageField/><div className="global-progress"><span ref={progressRef}/></div><header className={`nav ${navHidden&&!menuOpen?"nav-hidden":""}`}><nav><Mark/><div className="links">{PLATFORM_LINKS.map(([label,to])=><Link key={to} to={to}>{label}</Link>)}{roleLinks}</div><div className="nav-right"><span>HYDERABAD / IN</span>{user?<button className="nav-text" onClick={logout} title={user.name}>LOGOUT</button>:<Link className="nav-text" to="/login">LOGIN</Link>}<Magnetic href={user?"/journey":"/login"}><span>Start building</span><Arrow/></Magnetic></div><button className="menu" aria-label="Menu" aria-expanded={menuOpen} onClick={()=>setMenuOpen(o=>!o)}><span/><span/></button></nav></header>{menuOpen&&<MobileMenu onClose={()=>setMenuOpen(false)} roleLinks={roleLinks} user={user} onLogout={logout}/>}<main><Hero/><section className="statement dark" data-tone="ink"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark" data-tone="ink"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>08</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" data-tone="pink" id="contact">
+  return <div className="vj-landing"><Intro/><Cursor/><SmoothScroll/><PageField/><div className="global-progress"><span ref={progressRef}/></div><SiteNav overlay brandHref="#top"/><main><Hero/><section className="statement dark" data-tone="ink"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark" data-tone="ink"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>{String(counters.funded).padStart(2,"0")}</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" data-tone="pink" id="contact">
   <div className="contact-v13-back" aria-hidden="true">
     <span>QUESTION</span><span>BUILD</span><span>PROVE</span><span>IMPACT</span>
   </div>
@@ -797,15 +768,5 @@ export default function Landing(){
   </Reveal>
   <div className="contact-meta"><span>HYDERABAD / INDIA</span><span>PROBLEMS → IDEAS → STARTUPS</span><span>2026</span></div>
 </section>
-<footer className="footer-v13" data-tone="ink">
-  <div className="footer-word"><span>VJ</span><i>STARTUPS</i></div>
-  <div className="footer-orbits"><span/><span/><span/></div>
-  <div className="footer-grid">
-    <div className="footer-brand"><Mark/><p>Empowering college entrepreneurs to build the future, five great startups every year.</p></div>
-    <div><b>EXPLORE</b>{PLATFORM_LINKS.map(([label,to])=><Link key={to} to={to}>{label}</Link>)}</div>
-    <div><b>COMMUNITY</b><Link to="/journey">Startup journey</Link><Link to="/leaderboard">Leaderboard</Link><Link to={MENTOR_NETWORK}>Mentor network</Link><Link to="/changes">What&apos;s new</Link><a href="#faq">FAQ</a></div>
-    <div><b>CONNECT</b><a href="https://www.instagram.com/vj.startups" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://www.linkedin.com/company/vj-startups/" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="mailto:head.iie@vnrvjiet.in">head.iie@vnrvjiet.in</a><a href="mailto:kp@vjstartup.com?subject=Meeting%20Request">Schedule a meeting</a><span>Hyderabad, IN 500090</span></div>
-  </div>
-  <div className="footer-bottom"><span>© 2026 VJ Startups</span><span className="footer-legal"><Link to="/privacy">Privacy</Link><Link to="/terms">Terms</Link></span><a href="#top">BACK TO TOP ↑</a></div>
-</footer></main></div>;
+<SiteFooter tone="ink" topHref="#top"/></main></div>;
 }
