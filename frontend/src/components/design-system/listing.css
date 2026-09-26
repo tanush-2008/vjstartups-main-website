@@ -92,3 +92,5 @@
 .lx-tag.is-static{cursor:default}
 .lx-tag.is-static:hover{border-color:rgba(247,245,239,.12);color:rgba(247,245,239,.72)}
 .lx-grid>div>.lx-card{flex:1}
+.lx-card-accent{color:var(--lx-accent)}
+.lx-card-tagline{margin:-4px 0 0;color:var(--lx-accent);font-size:13px;font-weight:600;line-height:1.4}
