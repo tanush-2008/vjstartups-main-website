@@ -11,7 +11,7 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       <SiteNav />
-      <main className="overflow-x-hidden">
+      <main className="overflow-x-clip">
         <Suspense fallback={<div className="min-h-[70vh]" aria-busy="true" />}>{children ?? <Outlet />}</Suspense>
       </main>
       <SiteFooter />
