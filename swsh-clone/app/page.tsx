@@ -193,12 +193,27 @@ function Intro() {
     </div>
   );
 }
+function mixHex(a:string,b:string,t:number){
+  const pa=[1,3,5].map(i=>parseInt(a.slice(i,i+2),16));
+  const pb=[1,3,5].map(i=>parseInt(b.slice(i,i+2),16));
+  const r=pa.map((v,i)=>Math.round(v+(pb[i]-v)*t));
+  return `rgb(${r[0]},${r[1]},${r[2]})`;
+}
+const ease=(t:number)=>t*t*(3-2*t);
+const band=(p:number,a:number,b:number)=>ease(Math.min(Math.max((p-a)/(b-a),0),1));
+
 function Hero() {
-  const stage=useRef<HTMLDivElement>(null);
+  const outer=useRef<HTMLElement>(null);
+  const sticky=useRef<HTMLDivElement>(null);
   const reveal=useRef<HTMLDivElement>(null);
+  const blobWrap=useRef<HTMLDivElement>(null);
+  const blob=useRef<HTMLDivElement>(null);
+  const blobImg=useRef<HTMLImageElement>(null);
+  const cover=useRef<HTMLDivElement>(null);
+  const ribbon=useRef<HTMLDivElement>(null);
 
   useEffect(()=>{
-    const el=stage.current;
+    const el=sticky.current;
     if(!el)return;
     let rx=0,ry=0,tx=0,ty=0,raf=0;
     const move=(e:PointerEvent)=>{
@@ -222,8 +237,55 @@ function Hero() {
     return()=>{el.removeEventListener("pointermove",move);cancelAnimationFrame(raf)};
   },[]);
 
+  useEffect(()=>{
+    let raf=0;
+    const tick=(now:number)=>{
+      const el=outer.current;
+      if(!el){raf=requestAnimationFrame(tick);return}
+      const rect=el.getBoundingClientRect();
+      const total=Math.max(el.offsetHeight-window.innerHeight,1);
+      const p=Math.min(Math.max(-rect.top/total,0),1);
+
+      const textOut=band(p,.16,.38);
+      const blobT=band(p,.30,.82);
+      const bgT=band(p,.32,.88);
+      const ribbonIn=band(p,.55,.70);
+      const ribbonOut=band(p,.84,.97);
+      const ribbonOpacity=Math.max(0,ribbonIn-ribbonOut);
+
+      if(sticky.current){
+        sticky.current.style.setProperty("--fade",String(1-textOut));
+        sticky.current.style.setProperty("--fadeY",`${-textOut*46}px`);
+        sticky.current.style.background=mixHex("#ffffff","#080808",bgT);
+      }
+      if(blobWrap.current){
+        blobWrap.current.style.transform=`translate(-50%,-52%) scale(${1+blobT*2.6})`;
+      }
+      if(blob.current){
+        const wobble=Math.sin(now*.0007)*3*(1-blobT);
+        const r=Math.max(0,43-blobT*40+wobble);
+        blob.current.style.borderRadius=`${r}%`;
+      }
+      if(blobImg.current){
+        blobImg.current.style.filter=`saturate(${(.52*(1-blobT)).toFixed(3)}) contrast(1.04) brightness(${(1-blobT*.82).toFixed(3)})`;
+      }
+      if(cover.current){
+        cover.current.style.opacity=String(Math.min(1,blobT*1.1));
+      }
+      if(ribbon.current){
+        ribbon.current.style.opacity=String(ribbonOpacity);
+        ribbon.current.style.transform=`translate3d(0,${(1-ribbonIn)*16}px,0)`;
+      }
+
+      raf=requestAnimationFrame(tick);
+    };
+    raf=requestAnimationFrame(tick);
+    return()=>cancelAnimationFrame(raf);
+  },[]);
+
   return (
-    <section className="hero-v12" ref={stage} id="top">
+    <section className="opening" ref={outer} id="top">
+      <div className="hero-v12 opening-sticky" ref={sticky}>
       <div className="hero-v12-top">
         <span>VJ STARTUPS / HYDERABAD</span>
         <span>REAL PROBLEMS / REAL BUILDERS / REAL VENTURES</span>
@@ -238,9 +300,10 @@ function Hero() {
       <div className="hero-v12-ghost ghost-one" aria-hidden="true">QUESTION</div>
       <div className="hero-v12-ghost ghost-two" aria-hidden="true">IMPACT</div>
 
-      <div className="hero-v12-stage-wrap">
-        <div className="hero-v12-stage" aria-hidden="true">
-          <img src={IMG.hero} alt=""/>
+      <div className="hero-v12-stage-wrap" ref={blobWrap}>
+        <div className="hero-v12-stage opening-blob" ref={blob} aria-hidden="true">
+          <img src={IMG.hero} alt="" ref={blobImg}/>
+          <div className="opening-cover" ref={cover}/>
           <div className="hero-v12-stage-no">VJ / 00</div>
           <div className="hero-v12-stage-caption">A POSSIBILITY BECOMING A THING</div>
         </div>
@@ -253,7 +316,7 @@ function Hero() {
         </div>
       </div>
 
-      <Reveal className="hero-v12-copy">
+      <div className="hero-v12-copy">
         <span className="hero-v12-kicker">THE STARTUP QUESTION</span>
         <h1>
           <span className="hero-v12-line hero-v12-what">WHAT</span>
@@ -261,7 +324,7 @@ function Hero() {
           <span className="hero-v12-line hero-v12-didnt">DIDN&apos;T</span>
           <span className="hero-v12-line hero-v12-need">NEED AN IDEA?</span>
         </h1>
-      </Reveal>
+      </div>
 
       <div className="hero-v12-intro">
         <p>Start with what is broken.<br/>Follow the evidence.<br/>Build until reality says yes.</p>
@@ -273,7 +336,15 @@ function Hero() {
 
       <div className="hero-v12-bottom">
         <span>SCROLL TO BEGIN ↓</span>
-        <span>35 STARTUPS / 87 BUILDERS / 8 FUNDED</span>
+        <span>VJ / 00 → 01</span>
+      </div>
+
+      <div className="opening-ribbon" ref={ribbon} aria-hidden="true">
+        <span>35</span><small>STARTUPS</small>
+        <span>87</span><small>FUTURE BUILDERS</small>
+        <span>8</span><small>FUNDED</small>
+        <span>15</span><small>RESEARCH PARTNERS</small>
+      </div>
       </div>
     </section>
   );
@@ -430,6 +501,7 @@ function Ventures() {
 
 function Network() {
   const sectionRef=useRef<HTMLElement>(null);
+  const headRef=useRef<HTMLDivElement>(null);
   const mapRef=useRef<HTMLDivElement>(null);
   const upperRef=useRef<SVGGElement>(null);
   const lowerRef=useRef<SVGGElement>(null);
@@ -460,7 +532,7 @@ function Network() {
       }
       if(panelRef.current){
         panelRef.current.style.opacity=String(Math.max(0,eased-.05));
-        panelRef.current.style.transform=`translate3d(0,${(1-eased)*95}px,0) scale(${.94+eased*.06})`;
+        panelRef.current.style.transform=`translate3d(-50%,${(1-eased)*95}px,0) scale(${.94+eased*.06})`;
       }
       if(mapRef.current){
         mapRef.current.style.setProperty("--network-open",String(eased));
@@ -481,14 +553,28 @@ function Network() {
     return()=>cancelAnimationFrame(raf);
   },[]);
 
+  useEffect(()=>{
+    const clear=()=>{
+      if(!headRef.current||!mapRef.current)return;
+      const headBottom=headRef.current.getBoundingClientRect().bottom;
+      const sticky=mapRef.current.parentElement;
+      const stickyTop=sticky?sticky.getBoundingClientRect().top:0;
+      mapRef.current.style.top=`${headBottom-stickyTop+24}px`;
+    };
+    clear();
+    document.fonts?.ready.then(clear);
+    window.addEventListener("resize",clear);
+    return()=>window.removeEventListener("resize",clear);
+  },[]);
+
   return (
     <section className="network-v16 dark" id="network" ref={sectionRef}>
       <div className="network-v16-sticky">
-        <Reveal className="network-v16-head">
+        <div className="network-v16-head" data-reveal ref={headRef}>
           <span className="chapter-label">07 / THE NETWORK</span>
           <h2>ONE BUILDER.<br/><i>MANY FORCES.</i></h2>
           <p>The right people, knowledge, access and momentum turn a single build into a living ecosystem.</p>
-        </Reveal>
+        </div>
 
         <div className="network-v16-map" ref={mapRef} data-reveal>
           <div className="network-v16-glow"/>
@@ -601,7 +687,7 @@ export default function Home(){
     raf=requestAnimationFrame(tick);
     return()=>{observer.disconnect();cancelAnimationFrame(raf)};
   },[navHidden]);
-  return <><Intro/><Cursor/><SmoothScroll/><div className="global-progress"><span style={{transform:`scaleX(${progress})`}}/></div><header className={`nav ${navHidden?"nav-hidden":""}`}><nav><Mark/><div className="links"><a href="#journey">Journey</a><a href="#proof">Experience</a><a href="#ventures">Ventures</a><a href="#network">Network</a></div><div className="nav-right"><span>HYDERABAD / IN</span><Magnetic href="#contact"><span>Start building</span><Arrow/></Magnetic></div><button className="menu" aria-label="Menu"><span/><span/></button></nav></header><main><Hero/><section className="ribbon"><span>35</span><small>STARTUPS</small><span>87</span><small>FUTURE BUILDERS</small><span>8</span><small>FUNDED</small><span>15</span><small>RESEARCH PARTNERS</small></section><section className="statement dark"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>08</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" id="contact">
+  return <><Intro/><Cursor/><SmoothScroll/><div className="global-progress"><span style={{transform:`scaleX(${progress})`}}/></div><header className={`nav ${navHidden?"nav-hidden":""}`}><nav><Mark/><div className="links"><a href="#journey">Journey</a><a href="#proof">Experience</a><a href="#ventures">Ventures</a><a href="#network">Network</a></div><div className="nav-right"><span>HYDERABAD / IN</span><Magnetic href="#contact"><span>Start building</span><Arrow/></Magnetic></div><button className="menu" aria-label="Menu"><span/><span/></button></nav></header><main><Hero/><section className="statement dark"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>08</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" id="contact">
   <div className="contact-v13-back" aria-hidden="true">
     <span>QUESTION</span><span>BUILD</span><span>PROVE</span><span>IMPACT</span>
   </div>
