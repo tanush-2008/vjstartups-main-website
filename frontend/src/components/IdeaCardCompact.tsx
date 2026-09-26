@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CardCover } from "@/components/design-system/CardCover";
 import { Link } from "react-router-dom";
 import { getIdeaNavigationSlug } from "@/utils/slugUtils";
 import StageTransitionModal from "./StageTransitionModal";
@@ -63,11 +64,7 @@ const IdeaCard = ({ idea, onUpvote, onStageUpdate }: IdeaCardProps) => {
       <article className="lx-card">
         <Link to={`/ideas/${getIdeaNavigationSlug(idea)}`} className="lx-card-link" aria-label={idea.title} />
         <div className="lx-card-media">
-          {idea.titleImage ? (
-            <img src={idea.titleImage} alt="" loading="lazy" />
-          ) : (
-            <div className="lx-card-placeholder" aria-hidden="true">{idea.title.trim().charAt(0) || "I"}</div>
-          )}
+          <CardCover title={idea.title} image={idea.titleImage} />
           <span className="lx-card-kicker">Idea / {stageLabels[idea.stage - 1]}</span>
         </div>
         <div className="lx-card-body">

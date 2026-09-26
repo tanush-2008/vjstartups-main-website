@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { CardCover } from "@/components/design-system/CardCover";
 import { SuccessStory, formatStoryDate } from "@/data/successStories";
 import { usePdfAvailable } from "@/hooks/usePdfAvailable";
 
@@ -16,7 +17,7 @@ export default function SuccessStoryCard({ story, programId }: { story: SuccessS
         <a href={story.pdfUrl} target="_blank" rel="noopener noreferrer" className="lx-card-link" aria-label={story.title} />
       ) : null}
       <div className="lx-card-media">
-        {cover ? <img src={cover} alt="" loading="lazy" /> : <div className="lx-card-placeholder">{story.title.charAt(0)}</div>}
+        <CardCover title={story.title} image={cover} />
         <span className="lx-card-kicker">{story.season}{story.featured ? " / Featured" : ""}</span>
       </div>
       <div className="lx-card-body">

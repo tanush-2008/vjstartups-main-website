@@ -1,0 +1,32 @@
+/* Detail pages (problem, idea, startup). Builds on listing.css; accent from --lx-accent. */
+.dt-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:clamp(40px,5vw,80px);align-items:start}
+.dt-main{display:grid;gap:56px;min-width:0}
+.dt-figure{margin:0;overflow:hidden;border-radius:22px;background:#111}
+.dt-figure img{display:block;width:100%;max-height:560px;object-fit:cover}
+.lx .dt-lead{margin:0;font-size:clamp(20px,1.9vw,27px);white-space:pre-line}
+.dt-fields{display:grid}
+.dt-field{display:grid;grid-template-columns:48px minmax(0,1fr);gap:18px;padding:26px 0;border-top:1px solid rgba(247,245,239,.1)}
+.dt-field>span{padding-top:4px;color:var(--lx-accent);font:11px var(--mono);letter-spacing:.1em}
+.lx .dt-field h3{margin:0 0 10px;color:var(--white);font-size:20px;font-weight:800;letter-spacing:-.03em}
+.dt-field p{margin:0;color:rgba(247,245,239,.78);font-size:16px;line-height:1.65;white-space:pre-line;overflow-wrap:anywhere}
+
+.dt-side{position:sticky;top:calc(var(--sc-nav-h,76px) + 24px)}
+.dt-card{display:grid;gap:24px;padding:24px;border:1px solid rgba(247,245,239,.08);border-radius:22px;background:radial-gradient(circle at 100% 0,color-mix(in srgb,var(--lx-accent) 12%,transparent),transparent 55%),hsl(var(--card))}
+.dt-vote{display:flex;align-items:center;gap:14px}
+.dt-vote span{color:hsl(var(--muted-foreground));font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.dt-facts{display:grid;gap:12px;margin:0}
+.dt-facts>div{display:flex;justify-content:space-between;gap:16px;padding-bottom:12px;border-bottom:1px solid rgba(247,245,239,.07)}
+.dt-facts dt{color:hsl(var(--muted-foreground));font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.dt-facts dd{margin:0;color:var(--white);font-size:14px;font-weight:700;text-align:right}
+.dt-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px}
+.dt-actions .lx-cta{flex:1 0 100%;justify-content:center}
+.dt a.lx-textbtn{text-decoration:none}
+.lx-textbtn.dt-danger:hover{color:#ff6b6b}
+
+.dt-discussion{padding-top:0}
+.dt-discussion .lx-sec-head{margin-bottom:32px}
+
+@media(max-width:1000px){
+  .dt-grid{grid-template-columns:1fr}
+  .dt-side{position:static;order:-1}
+}

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Search, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import UpvoteButton from "@/components/UpvoteButton";
 import { PageHero } from "@/components/design-system/PageHero";
+import { CardCover } from "@/components/design-system/CardCover";
 import { TitleMarquee } from "@/components/design-system/HeroSignatures";
 import { isReadableTitle } from "@/utils/readableTitle";
 import "@/components/design-system/listing.css";
@@ -353,7 +354,7 @@ const handleUpvote = async (problemId: string) => {
               <article key={problem.id || problem.problemId} id={`problem-${problem.problemId}`} className="lx-card">
                 <Link to={`/problems/${problem.problemId}`} className="lx-card-link" aria-label={problem.title} />
                 <div className="lx-card-media">
-                  <img src={problem.image || "/problem_placeholder_cover1.png"} alt="" loading="lazy" />
+                  <CardCover title={problem.title} image={problem.image} />
                   <span className="lx-card-kicker">{String(startIndex + i + 1).padStart(2, "0")} / Problem</span>
                   <div className="lx-card-vote">
                     <UpvoteButton
@@ -377,7 +378,7 @@ const handleUpvote = async (problemId: string) => {
                   <h3 className="lx-card-title">{problem.title}</h3>
                   <p className="lx-card-text">{problem.briefparagraph}</p>
                   <div className="lx-card-meta">
-                    <span>By {problem.addedByName} · {problem.comments.length} comments</span>
+                    <span>{problem.addedByName ? `By ${problem.addedByName} · ` : ""}{problem.comments?.length ?? 0} comments</span>
                     <em>Read ↗</em>
                   </div>
                 </div>

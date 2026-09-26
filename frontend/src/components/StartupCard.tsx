@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { CardCover } from "@/components/design-system/CardCover";
 import { Link } from "react-router-dom";
 import { stageLabels } from "@/data/mockData";
 import { StartupListItem } from "@/types/startup";
@@ -13,19 +13,13 @@ interface StartupCardProps {
 }
 
 const StartupCard = ({ startup }: StartupCardProps) => {
-  const [imageError, setImageError] = useState(false);
   const imageUrl = getStartupImageUrl(startup.coverImage);
-  const showImage = imageUrl && !imageError;
 
   return (
     <article className="lx-card">
       <Link to={`/startups/${startup.id}`} className="lx-card-link" aria-label={startup.startupName || "Startup"} />
       <div className="lx-card-media">
-        {showImage ? (
-          <img src={imageUrl} alt="" loading="lazy" onError={() => setImageError(true)} />
-        ) : (
-          <div className="lx-card-placeholder" aria-hidden="true">{(startup.startupName || "S").trim().charAt(0)}</div>
-        )}
+        <CardCover title={startup.startupName || "Startup"} image={imageUrl} />
         <span className="lx-card-kicker">Startup / {stageLabels[(startup.stage || 1) - 1]}</span>
       </div>
       <div className="lx-card-body">
