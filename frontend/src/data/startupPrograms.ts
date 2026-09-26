@@ -42,6 +42,22 @@ export interface StartupProgram {
   };
 }
 
+export const PROGRAM_CATEGORIES: Record<StartupProgram["category"], string> = {
+  challenge: "Challenges & Competitions",
+  internship: "Internships & Mentorship",
+  learning: "Learning & Development",
+  networking: "Networking & Community",
+  training: "Technical Training",
+  event: "Events & Workshops",
+  initiative: "Campus Initiatives",
+};
+
+export const PROGRAM_STATUS: Record<StartupProgram["status"], string> = {
+  active: "Running",
+  completed: "Completed",
+  planned: "Planned",
+};
+
 export const startupPrograms: StartupProgram[] = [
   {
     id: 'startup-challenge-2',
@@ -51,7 +67,7 @@ export const startupPrograms: StartupProgram[] = [
     status: 'active',
     edition: 3,
     category: 'challenge',
-    shortDescription: 'Grow ₹1000 in 15 days  with your business idea, under successful mentors.',
+    shortDescription: 'Grow ₹1000 in 15 days with your business idea, under successful mentors.',
     overview: `The Startup Challenge is an intensive 10-15 day program where students receive upto ₹1000 as seed money and challenge themselves to grow it through entrepreneurial activities. This hands-on experience teaches practical business skills, customer validation, and resource management.`,
     howToParticipate: [
       'Submit your business proposal with a basic business idea or growth strategy',
@@ -62,7 +78,7 @@ export const startupPrograms: StartupProgram[] = [
     ],
     support: [
       'Initial seed funding of upto ₹1000',
-      'Dedicated mentorship from Prevous Participants who successfully completed the challenge',
+      'Dedicated mentorship from previous participants who successfully completed the challenge',
       'Access to university resources and networks',
       'Documentation templates and tracking tools'
     ],

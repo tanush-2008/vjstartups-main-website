@@ -2,42 +2,20 @@ import { Link } from "react-router-dom";
 import type { CSSProperties } from "react";
 import { useUser } from "@/pages/UserContext";
 import "@/components/design-system/listing.css";
-import { startupPrograms, StartupProgram } from "@/data/startupPrograms";
+import "@/components/design-system/programs.css";
+import { startupPrograms, StartupProgram, PROGRAM_CATEGORIES, PROGRAM_STATUS } from "@/data/startupPrograms";
 import { PageHero } from "@/components/design-system/PageHero";
 import { ProgramStrip } from "@/components/design-system/HeroSignatures";
 
 const Programs = () => {
   const { user } = useUser();
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'Active';
-      case 'completed':
-        return 'Completed';
-      case 'planned':
-        return 'Planned';
-      default:
-        return 'Unknown';
-    }
-  };
 
-  const groupedPrograms = startupPrograms.reduce((acc, program) => {
-    if (!acc[program.category]) {
-      acc[program.category] = [];
-    }
-    acc[program.category].push(program);
+  const groups = startupPrograms.reduce((acc, program) => {
+    (acc[program.category] ||= []).push(program);
     return acc;
   }, {} as Record<string, StartupProgram[]>);
 
-  const categoryTitles = {
-    challenge: 'Challenges & Competitions',
-    internship: 'Internships & Mentorship',
-    learning: 'Learning & Development',
-    networking: 'Networking & Community',
-    training: 'Technical Training',
-    event: 'Events & Workshops',
-    initiative: 'Campus Initiatives'
-  };
+  let n = 0;
 
   return (
     <div className="page-shell lx" style={{ "--lx-accent": "var(--lime)" } as CSSProperties}>
@@ -47,7 +25,7 @@ const Programs = () => {
         description="Comprehensive ecosystem of programs, workshops, and initiatives designed to nurture student entrepreneurship."
         stats={[
           { value: String(startupPrograms.length), label: "Programs" },
-          { value: "All students", label: "Welcome" },
+          { value: String(startupPrograms.filter((p) => p.status === "active").length), label: "Running now" },
           { value: "1 hour to 2 months", label: "Program duration" },
         ]}
         signature={
@@ -58,34 +36,39 @@ const Programs = () => {
       />
 
       <section className="lx-section">
-        {Object.entries(groupedPrograms).map(([category, programs], sectionIndex) => (
-          <div key={category} className="lx-block">
-            <div className="lx-sec-head">
-              <span>{String(sectionIndex + 1).padStart(2, "0")} / {programs.length} program{programs.length > 1 ? "s" : ""}</span>
-              <h2>{categoryTitles[category as keyof typeof categoryTitles] || category}</h2>
+        <div className="pg-index">
+          {Object.entries(groups).map(([category, programs], g) => (
+            <div key={category} className="pg-group">
+              <div className="pg-group-label">
+                <span>{String(g + 1).padStart(2, "0")}</span>
+                <b>{PROGRAM_CATEGORIES[category as StartupProgram["category"]] || category}</b>
+              </div>
+              <ol className="pg-rows">
+                {programs.map((program) => {
+                  n += 1;
+                  return (
+                    <li key={program.id}>
+                      <Link to={`/programs/${program.id}`} className="pg-row">
+                        <span className="pg-row-no">{String(n).padStart(2, "0")}</span>
+                        <div className="pg-row-name">
+                          <h3>{program.title}</h3>
+                          <p>{program.subtitle}</p>
+                        </div>
+                        <p className="pg-row-desc">{program.shortDescription}</p>
+                        <span className="pg-row-dur">{program.duration}</span>
+                        <b className={`pg-status is-${program.status}`}>
+                          {PROGRAM_STATUS[program.status]}
+                          {program.edition ? <small> / #{program.edition}</small> : null}
+                        </b>
+                        <i aria-hidden="true">↗</i>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ol>
             </div>
-            <div className="lx-grid">
-              {programs.map((program) => (
-                <article key={program.id} className="lx-card">
-                  <Link to={`/programs/${program.id}`} className="lx-card-link" aria-label={program.title} />
-                  <div className="lx-card-body">
-                    <div className="lx-card-status">
-                      <span>{program.category}{program.edition ? ` / #${program.edition}` : ""}</span>
-                      <b className={`is-${program.status}`}>{getStatusText(program.status)}</b>
-                    </div>
-                    <h3 className="lx-card-title">{program.title}</h3>
-                    <p className="lx-card-tagline">{program.subtitle}</p>
-                    <p className="lx-card-text">{program.shortDescription}</p>
-                    <div className="lx-card-meta">
-                      <span>{program.duration}</span>
-                      <em>Details ↗</em>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
         <div className="lx-gate">
           <span>Your move</span>
