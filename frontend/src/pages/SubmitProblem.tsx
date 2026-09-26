@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import "@/components/design-system/forms.css";
 import { PageHero } from "@/components/design-system/PageHero";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -195,6 +196,7 @@ const SubmitProblem: React.FC = () => {
   return (
     <div className="page-shell">
       <PageHero
+        accent="pink"
         eyebrow="Problem discovery"
         title={"Submit a New Problem"}
         description={"Identify real-world challenges that need innovative solutions. Help the community understand problems worth solving and inspire breakthrough ideas."}
@@ -202,7 +204,7 @@ const SubmitProblem: React.FC = () => {
       >
         <p className="ph-note">Off-topic or irrelevant submissions will be rejected by the admin team.</p>
       </PageHero>
-      <div className="form-shell">
+      <div className="form-shell fm" data-accent="pink">
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}

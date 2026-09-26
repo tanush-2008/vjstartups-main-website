@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import "@/components/design-system/forms.css";
 import { PageHero } from "@/components/design-system/PageHero";
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
@@ -518,6 +519,7 @@ const StartupForm: React.FC = () => {
   return (
     <div className="page-shell">
       <PageHero
+        accent="violet"
         eyebrow="Startup portfolio"
         title={isEditMode ? "Update Your Startup" : "Create Your Startup"}
         description={isEditMode ? "Enhance your startup profile to attract more investors, mentors, and collaborators. Keep your information current and showcase your latest achievements." : "Transform your validated idea into an official startup. Join our ecosystem and get access to funding, mentorship, and growth opportunities."}
@@ -531,7 +533,7 @@ const StartupForm: React.FC = () => {
               <p className="ph-tag">Editing mode / update your startup profile</p>
             )}
       </PageHero>
-      <div className="form-shell">
+      <div className="form-shell fm" data-accent="violet">
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
