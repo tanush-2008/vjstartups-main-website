@@ -1,35 +1,20 @@
 import { Link } from "react-router-dom";
+import { PageHero } from "@/components/design-system/PageHero";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 const PrivacyPolicy = () => {
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <Link
-            to="/"
-            onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "auto" })}
-          >
-            <Button variant="ghost" className="text-gray-700 dark:text-gray-300">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-
+    <div className="page-shell">
+      <PageHero
+        eyebrow="Legal"
+        title="Privacy Policy"
+        description="Last updated March 6, 2026. How VJ Startups collects, uses and protects information when you use the platform."
+        backLink={{ label: "Home", to: "/" }}
+      />
+      <div className="form-shell">
         <Card className="p-6 md:p-8 space-y-6">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full mb-4">
-              <ShieldCheck className="w-4 h-4" />
-              <span className="text-sm font-medium">VJ Startups</span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              Privacy Policy
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Last updated: March 6, 2026</p>
-          </div>
 
           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
             This policy explains how VJ Startups collects, uses, and protects information when you use

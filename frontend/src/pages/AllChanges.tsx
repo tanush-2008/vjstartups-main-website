@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PageHero } from "@/components/design-system/PageHero";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Timer, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -83,29 +84,15 @@ const AllChanges = () => {
   }, []);
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-6">
-          <Link
-            to="/"
-            onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "auto" })}
-          >
-            <Button variant="ghost" className="text-gray-700 dark:text-gray-300">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-
+    <div className="page-shell">
+      <PageHero
+        eyebrow="Idea activity"
+        title="Progress of Ideas"
+        description="The complete history of idea stage unlocks across the platform."
+        backLink={{ label: "Home", to: "/" }}
+      />
+      <div className="form-shell">
         <Card className="p-6 md:p-8">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full mb-4">
-              <Timer className="w-4 h-4" />
-              <span className="text-sm font-medium">Idea Activity</span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">Progress of Ideas</h1>
-            <p className="text-gray-600 dark:text-gray-300">Complete history of idea stage unlock updates</p>
-          </div>
 
           {loading ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading all changes...</div>
