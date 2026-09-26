@@ -1,11 +1,14 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import Lenis from "lenis";
 import { useUser } from "@/pages/UserContext";
 import { counters } from "@/data/mockData";
 import { Arrow, Magnetic, SiteFooter, SiteNav } from "@/components/site/SiteChrome";
 import { onMeasure, pageMetrics, progressOf, useSectionFrame } from "./frame";
+import { useNetworkScene } from "./network/useNetworkScene";
+import type { NetPick } from "./network/scene";
 import "./landing.css";
+import "./network/network.css";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:6220";
 
@@ -523,18 +526,54 @@ function Ventures() {
   const [active,setActive]=useState(0), v=VENTURES[active];return <section className="ventures light" data-tone="paper" id="ventures"><Reveal className="ventures-head"><span className="chapter-label dark">06 / PROOF</span><h2>IDEAS THAT<br/><i>MOVED.</i></h2><p>Selected ventures and technologies already moving through the ecosystem.</p></Reveal><div className="venture-stage" data-reveal><div className="venture-menu">{VENTURES.map((x,i)=><button key={x[0]} className={i===active?"active":""} onClick={()=>setActive(i)}><span>{x[0]}</span><div><small>{x[1]}</small><b>{x[2]}</b></div><Arrow/></button>)}</div><div className="venture-image"><img src={v[4]} alt="" key={v[0]} loading="lazy" decoding="async"/><div><span>{v[1]}</span><span>{v[0]} / 03</span></div></div><div className="venture-copy"><span className="kicker dark">{v[1]}</span><h3>{v[2]}</h3><p>{v[3]}</p><Link to="/startups">Explore the build <Arrow/></Link></div></div></section>;
 }
 
+const VENTURE_NAMES=VENTURES.map(v=>v[2]);
+const NET_KIND_LABEL={problem:"Problem",idea:"Idea",venture:"Funded venture"} as const;
+
 function Network() {
   const sectionRef=useRef<HTMLElement>(null);
+  const stickyRef=useRef<HTMLDivElement>(null);
+  const canvasRef=useRef<HTMLCanvasElement>(null);
+  const tipRef=useRef<HTMLDivElement>(null);
   const headRef=useRef<HTMLDivElement>(null);
   const mapRef=useRef<HTMLDivElement>(null);
   const upperRef=useRef<SVGGElement>(null);
   const lowerRef=useRef<SVGGElement>(null);
   const panelRef=useRef<HTMLDivElement>(null);
   const nodes=useRef<Array<HTMLSpanElement|null>>([]);
-  const labels=["STUDENTS","PROBLEMS","RESEARCH","MENTORS","INDUSTRY","CAPITAL","CAMPUS"];
+  const net=useNetworkScene({section:sectionRef,sticky:stickyRef,canvas:canvasRef,map:mapRef},API_BASE,VENTURE_NAMES);
+  const [stage,setStage]=useState(0);
+  const [hover,setHover]=useState<NetPick|null>(null);
+  const hoverRef=useRef<NetPick|null>(null);
+  hoverRef.current=hover;
 
   useSectionFrame(sectionRef,frame=>{
       const p=progressOf(frame);
+      const scene=net.scene.current;
+      if(scene){
+        // Stages: problems, then ideas (.16-.46), then the system (.46-.74), then the panel (.8+).
+        const open=band(p,.8,.96);
+        scene.update(p,frame.now,1-open*.72);
+        scene.render();
+        setStage(scene.t2>.5?2:scene.t1>.5?1:0);
+        const {canvasLeft,mapLeft,mapTop}=net.geometry.current;
+        const ring=scene.ring(nodes.current.length);
+        nodes.current.forEach((node,i)=>{
+          if(!node)return;
+          const s=ring[i];
+          node.style.transform=`translate3d(${s.x+canvasLeft-mapLeft}px,${s.y-mapTop}px,0) translate(-50%,-50%)`;
+          node.style.opacity=String(scene.t2*(.35+.65*s.front)*(1-open*.6));
+        });
+        const h=hoverRef.current;
+        if(h&&tipRef.current){
+          const s=scene.project(h.index);
+          tipRef.current.style.transform=`translate3d(${s.x+canvasLeft}px,${s.y}px,0)`;
+        }
+        if(panelRef.current){
+          panelRef.current.style.opacity=String(Math.max(0,open-.05));
+          panelRef.current.style.transform=`translate3d(-50%,${(1-open)*95}px,0) scale(${.94+open*.06})`;
+        }
+        return;
+      }
       const open=Math.min(Math.max((p-.30)/.56,0),1);
       const eased=1-Math.pow(1-open,3);
 
@@ -575,9 +614,36 @@ function Network() {
     return()=>window.removeEventListener("resize",clear);
   },[]);
 
+  const pick=(e:ReactPointerEvent<HTMLDivElement>)=>{
+    const scene=net.scene.current, sticky=stickyRef.current;
+    if(!scene||!sticky)return;
+    const r=sticky.getBoundingClientRect();
+    scene.setPointer((e.clientX-r.left)/r.width*2-1,(e.clientY-r.top)/r.height*2-1);
+    if(tipRef.current?.contains(e.target as Node))return; // keep the card while reading it
+    const found=scene.pick(e.clientX-r.left-net.geometry.current.canvasLeft,e.clientY-r.top,e.pointerType==="touch"?36:24);
+    if((found?.index??-1)!==(hoverRef.current?.index??-1)){
+      scene.setHover(found?.index??null);
+      setHover(found);
+    }
+  };
+  const clearHover=()=>{net.scene.current?.setHover(null);setHover(null)};
+  const stageText=[
+    net.problems?`01 / ${net.problems} REAL PROBLEMS, POSTED BY STUDENTS`:"01 / PROBLEMS, POSTED BY STUDENTS",
+    net.ideas?`02 / ${net.ideas} IDEAS ANSWERING THEM`:"02 / IDEAS ANSWERING THEM",
+    "03 / FUNDED VENTURES AT THE CORE",
+  ][stage];
+
   return (
-    <section className="network-v16 dark" data-tone="ink" id="network" ref={sectionRef}>
-      <div className="network-v16-sticky">
+    <section className={`network-v16 dark${net.active?" has-scene":""}`} data-tone="ink" id="network" ref={sectionRef}>
+      <div className="network-v16-sticky" ref={stickyRef} onPointerMove={pick} onPointerDown={pick} onPointerLeave={clearHover}>
+        <canvas className="network-v16-canvas" ref={canvasRef} aria-hidden="true"/>
+        {hover&&(
+          <div className={`net-tip is-${hover.item.kind}${hover.x>(stickyRef.current?.clientWidth??0)*.62?" is-left":""}`} ref={tipRef}>
+            {hover.item.href?.startsWith("#")
+              ?<a href={hover.item.href} className="net-tip-link"><span className="net-tip-hit"/><span className="net-tip-card"><small>{NET_KIND_LABEL[hover.item.kind]}</small><b>{hover.item.title}</b><em>See it in Proof ↗</em></span></a>
+              :<Link to={hover.item.href!} className="net-tip-link"><span className="net-tip-hit"/><span className="net-tip-card"><small>{NET_KIND_LABEL[hover.item.kind]}</small><b>{hover.item.title}</b><em>Open ↗</em></span></Link>}
+          </div>
+        )}
         <div className="network-v16-head" data-reveal ref={headRef}>
           <span className="chapter-label">07 / THE NETWORK</span>
           <h2>ONE BUILDER.<br/><i>MANY FORCES.</i></h2>
@@ -643,8 +709,8 @@ function Network() {
           </div>
 
           <div className="network-v16-caption">
-            <span>PEOPLE / KNOWLEDGE / ACCESS / MOMENTUM</span>
-            <span>SCROLL DOWN — LET THE WEAVE OPEN</span>
+            <span>{net.active?stageText:"PEOPLE / KNOWLEDGE / ACCESS / MOMENTUM"}</span>
+            <span>{net.active?(net.problems?"EVERY POINT IS REAL — POINT AT ONE TO READ IT":"SCROLL — WATCH IT FIND ITS SHAPE"):"SCROLL DOWN — LET THE WEAVE OPEN"}</span>
           </div>
         </div>
 
