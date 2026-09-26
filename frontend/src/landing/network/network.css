@@ -5,12 +5,19 @@
 .vj-landing .network-v16.has-scene .network-v16-canvas{opacity:1}
 .vj-landing .network-v16.has-scene .network-v16-sticky{overflow:visible}
 .vj-landing .network-v16.has-scene .network-v16-map{z-index:6}
-/* The drawn weave is replaced by the points; its glow and "keep going" cue stay. */
-.vj-landing .network-v16.has-scene .network-v16-svg{display:none}
-.vj-landing .network-v16.has-scene .network-v16-map:after{display:none}
+/* V18's vertical centre axis ran down through the stats row; the drawn weave carries the section now. */
+.vj-landing .network-v16 .network-v16-map:after{display:none}
 
-/* The seven forces keep their V18 places; they arrive with the weave. */
-.vj-landing .network-v16.has-scene .network-v16-node{opacity:0;transition:none}
+/* The seven forces are pinned to the weave and positioned per frame (see Network in Landing.tsx). */
+.vj-landing .network-v16 .network-v16-node{left:0!important;top:0!important;right:auto!important;bottom:auto!important;opacity:0;transition:none;will-change:transform,opacity}
+.vj-landing .network-v16 .network-v16-node:after{height:26px}
+
+/* The weave draws itself as the section arrives. */
+.vj-landing .network-v16 :is(.network-v16-line,.network-v16-blur){stroke-dasharray:1 1;stroke-dashoffset:calc(1 - var(--weave-draw,1))}
+.vj-landing .network-v16 :is(.network-v16-ribbon,.network-v16-ribbon-thin,.network-v16-dotted){stroke-opacity:var(--weave-draw,1)}
+.vj-landing .network-v16 .network-v16-center-thread{stroke-opacity:calc((1 - var(--network-open)) * var(--weave-draw,1))}
+/* "Keep going" peaks while the weave opens and is gone before the panel lands on it. */
+.vj-landing .network-v16 .network-v16-opening{opacity:calc((.18 + var(--network-open) * .82) * (1 - var(--network-open)) * var(--weave-draw,1))}
 
 .vj-landing .network-v16.has-scene .network-v16-caption{color:rgba(255,255,255,.55)}
 .vj-landing .network-v16.has-scene .network-v16-caption span:first-child{color:var(--lime)}
@@ -35,3 +42,8 @@
   .vj-landing .network-v16{--net-pad:18px}
   .vj-landing .net-tip-card{max-width:200px}
 }
+
+/* A little more presence for the strands on ordinary laptop displays (they carry the section). */
+.vj-landing .network-v16 .network-v16-line{stroke:rgba(255,255,255,.17)}
+.vj-landing .network-v16 .network-v16-blur{stroke:rgba(255,255,255,.12)}
+.vj-landing .network-v16 .network-v16-dotted{stroke:rgba(215,255,99,.24)}

@@ -4,7 +4,9 @@
 .ph[data-accent="violet"]{--ph-accent:var(--violet)}
 .ph:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 12% 0%,color-mix(in srgb,var(--ph-accent) 8%,transparent),transparent 42%)}
 .ph-ghost{position:absolute;right:-2vw;bottom:-4vw;color:rgba(247,245,239,.028);font-size:clamp(140px,22vw,360px);font-weight:800;line-height:.7;letter-spacing:-.12em;text-transform:uppercase;white-space:nowrap;pointer-events:none;user-select:none}
-.ph-inner{position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:clamp(56px,8vw,112px) 7vw clamp(40px,5vw,64px)}
+/* The header extends up beneath the transparent site header, so there is no seam between them. */
+.ph{margin-top:calc(var(--sc-nav-h) * -1)}
+.ph-inner{position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:calc(clamp(56px,8vw,112px) + var(--sc-nav-h)) 7vw clamp(40px,5vw,64px)}
 
 .ph-meta{display:flex;justify-content:space-between;gap:24px;color:hsl(var(--muted-foreground));font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase}
 .ph-eyebrow{display:inline-flex;align-items:center;gap:10px;color:var(--white)}
@@ -27,7 +29,7 @@
 .ph-extra{margin-top:32px}
 
 @media(max-width:700px){
-  .ph-inner{padding:48px 18px 36px}
+  .ph-inner{padding:calc(48px + var(--sc-nav-h)) 18px 36px}
   .ph-meta span:last-child{display:none}
   .ph-foot{grid-template-columns:1fr}
   .ph-actions{justify-content:flex-start}
@@ -39,7 +41,7 @@
 .form-shell{max-width:1600px;margin:0 auto;padding:48px 7vw 110px}.form-shell>*{max-width:56rem}@media(max-width:700px){.form-shell{padding:32px 18px 80px}}
 
 /* Sign-in */
-.auth{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(320px,.7fr);align-items:end;gap:6vw;min-height:calc(100svh - 77px);padding:clamp(56px,8vw,112px) 7vw;background:radial-gradient(circle at 12% 10%,rgba(215,255,99,.07),transparent 40%),hsl(var(--background))}
+.auth{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(320px,.7fr);align-items:end;gap:6vw;min-height:100svh;margin-top:calc(var(--sc-nav-h) * -1);padding:calc(clamp(56px,8vw,112px) + var(--sc-nav-h)) 7vw clamp(56px,8vw,112px);background:radial-gradient(circle at 12% 10%,rgba(215,255,99,.07),transparent 40%),hsl(var(--background))}
 .auth-meta{color:hsl(var(--muted-foreground));font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase}
 .auth .auth-statement h1{margin:28px 0 0;color:var(--white);font-size:clamp(64px,10vw,168px);font-weight:800;line-height:.82;letter-spacing:-.085em;text-transform:uppercase}
 .auth-statement h1 em{font-style:normal;color:var(--lime)}
@@ -49,7 +51,7 @@
 .auth-google{min-height:44px}
 .auth-legal{margin:0;color:hsl(var(--muted-foreground));font:10px var(--mono);letter-spacing:.08em;line-height:1.7;text-transform:uppercase}
 .auth-legal a{color:var(--lime);text-decoration:none}
-@media(max-width:900px){.auth{grid-template-columns:1fr;align-items:start;gap:40px;padding:48px 18px 80px}}
+@media(max-width:900px){.auth{grid-template-columns:1fr;align-items:start;gap:40px;padding:calc(48px + var(--sc-nav-h)) 18px 80px}}
 
 /* Entrance: title words rise out of a mask, then the details follow. Held while the route
    curtain is down (html.pt-busy) so it plays as the curtain lifts. */

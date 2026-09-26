@@ -72,7 +72,7 @@ const SHARED_GLSL = /* glsl */ `
     float t2 = ease01(uT2 * 1.35 - seed * 0.35);
     vec3 p = mix(mix(A, B, t1), C, t2);
     p += vec3(sin(uTime * 0.35 + seed * 40.0), cos(uTime * 0.29 + seed * 23.0), sin(uTime * 0.31 + seed * 57.0))
-      * 0.22 * uMotion * (1.0 - 0.6 * t2);
+      * 0.22 * uMotion * (1.0 - 0.85 * t2);
     p.y += side * uOpen * uOpenDist * t2;
     return p;
   }
@@ -410,13 +410,10 @@ export class NetworkScene {
     this.pointer.x += (this.pointer.tx - this.pointer.x) * 0.06;
     this.pointer.y += (this.pointer.ty - this.pointer.y) * 0.06;
     // The field turns in space while it is loose, then squares up to face the viewer as the
-    // weave forms; only a small pointer tilt remains.
+    // weave forms.
     const loose = 1 - this.t2;
-    this.group.rotation.set(
-      (-0.08 + this.pointer.y * 0.08) * loose + this.pointer.y * 0.05,
-      (time * 0.035 + p * 1.6 + this.pointer.x * 0.14) * loose + this.pointer.x * 0.06,
-      0
-    );
+    // Once on the weave the points must sit on the drawn lines, so no tilt remains.
+    this.group.rotation.set((-0.08 + this.pointer.y * 0.08) * loose, (time * 0.035 + p * 1.6 + this.pointer.x * 0.14) * loose, 0);
     this.group.updateMatrixWorld();
   }
 
@@ -433,7 +430,7 @@ export class NetworkScene {
     const t1 = smooth(this.t1 * 1.35 - seed * 0.35);
     const t2 = smooth(this.t2 * 1.35 - seed * 0.35);
     const time = this.uniforms.uTime.value;
-    const drift = 0.22 * this.uniforms.uMotion.value * (1 - 0.6 * t2);
+    const drift = 0.22 * this.uniforms.uMotion.value * (1 - 0.85 * t2);
     const mixed = (k: number) => {
       const ab = this.A[i * 3 + k] + (this.B[i * 3 + k] - this.A[i * 3 + k]) * t1;
       return ab + (this.C[i * 3 + k] - ab) * t2;

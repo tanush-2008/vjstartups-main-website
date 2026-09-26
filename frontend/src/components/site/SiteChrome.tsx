@@ -62,6 +62,14 @@ export function SiteNav({ overlay = false, brandHref = "/" }: { overlay?: boolea
   const { user, logout, roleLinks } = useAccount();
   const [menuOpen, setMenuOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [atTop, setAtTop] = useState(true);
+
+  useEffect(() => {
+    const onScroll = () => setAtTop(window.scrollY < 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (!overlay) return;
@@ -78,7 +86,7 @@ export function SiteNav({ overlay = false, brandHref = "/" }: { overlay?: boolea
   }, [overlay]);
 
   const cta = user ? "/journey" : "/login";
-  const cls = ["sc-nav", overlay && "is-overlay", hidden && !menuOpen && "is-hidden"].filter(Boolean).join(" ");
+  const cls = ["sc-nav", overlay && "is-overlay", atTop && "is-top", hidden && !menuOpen && "is-hidden"].filter(Boolean).join(" ");
 
   return (
     <>

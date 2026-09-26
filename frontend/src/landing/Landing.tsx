@@ -296,6 +296,10 @@ function Hero() {
       const ribbonOut=band(p,.84,.97);
       const ribbonOpacity=Math.max(0,ribbonIn-ribbonOut);
 
+      // Lets the overlay header switch to dark ink while the hero is still white.
+      const light=bgT<.5?"1":"0";
+      const root=outer.current?.closest<HTMLElement>(".vj-landing");
+      if(root&&root.dataset.heroLight!==light)root.dataset.heroLight=light;
       if(sticky.current){
         sticky.current.style.setProperty("--fade",String(1-textOut));
         sticky.current.style.setProperty("--fadeY",`${-textOut*46}px`);
@@ -527,6 +531,16 @@ function Ventures() {
 }
 
 const VENTURE_NAMES=VENTURES.map(v=>v[2]);
+// Where each force sits on the weave: [strand, position along it].
+const FORCE_PINS:[("upperLine"|"upperRibbon"|"lowerLine"|"lowerRibbon"),number][]=[
+  ["upperLine",.1],    // 01 Students
+  ["upperRibbon",.9],  // 02 Problems
+  ["lowerLine",.84],   // 03 Research
+  ["lowerRibbon",.66], // 04 Mentors
+  ["lowerRibbon",.2],  // 05 Industry
+  ["upperRibbon",.3],  // 06 Capital
+  ["upperLine",.52],   // 07 Campus
+];
 const NET_KIND_LABEL={problem:"Problem",idea:"Idea",venture:"Funded venture"} as const;
 
 function Network() {
@@ -546,60 +560,80 @@ function Network() {
   const hoverRef=useRef<NetPick|null>(null);
   hoverRef.current=hover;
 
+  // Each force is pinned to a point on a weave strand (its connector line drops onto the curve),
+  // appears when the drawing reaches it, and travels with its strand when the weave parts.
+  const pins=useRef<{x:number,y:number,side:1|-1,cx:number,cy:number,t:number,w:number,h:number}[]>([]);
+  const mapScale=useRef({sx:1,sy:1});
+  useEffect(()=>{
+    const map=mapRef.current;
+    if(!map)return;
+    const measure=()=>{
+      const strands={
+        upperLine:map.querySelector<SVGPathElement>(".network-v16-weave-upper .network-v16-line"),
+        upperRibbon:map.querySelector<SVGPathElement>(".network-v16-weave-upper .network-v16-ribbon"),
+        lowerLine:map.querySelector<SVGPathElement>(".network-v16-weave-lower .network-v16-line"),
+        lowerRibbon:map.querySelector<SVGPathElement>(".network-v16-weave-lower .network-v16-ribbon"),
+      };
+      const boxes={upper:upperRef.current?.getBBox(),lower:lowerRef.current?.getBBox()};
+      mapScale.current={sx:map.clientWidth/1200,sy:map.clientHeight/720};
+      pins.current=FORCE_PINS.map(([strand,t],i)=>{
+        const path=strands[strand];
+        const point=path?path.getPointAtLength(path.getTotalLength()*t):{x:600,y:360};
+        const upper=strand.startsWith("upper");
+        const box=upper?boxes.upper:boxes.lower;
+        const node=nodes.current[i];
+        return {x:point.x,y:point.y,side:upper?1:-1,cx:box?box.x+box.width/2:600,cy:box?box.y+box.height/2:360,t,w:node?.offsetWidth??90,h:node?.offsetHeight??30};
+      });
+    };
+    measure();
+    document.fonts?.ready.then(measure);
+    const ro=new ResizeObserver(measure);
+    ro.observe(map);
+    return()=>ro.disconnect();
+  },[]);
+
   useSectionFrame(sectionRef,frame=>{
       const p=progressOf(frame);
       const scene=net.scene.current;
-      if(scene){
-        // Stages: problems, ideas (.16-.46), the weave (.46-.74), then it parts for the panel (.78+).
-        const open=band(p,.78,.96);
-        const eased=1-Math.pow(1-open,3);
-        scene.update(p,frame.now,eased,1-open*.25);
-        scene.render();
-        setStage(scene.t2>.5?2:scene.t1>.5?1:0);
-        const {canvasLeft}=net.geometry.current;
-        mapRef.current?.style.setProperty("--network-open",String(eased));
-        // The forces keep their V18 places and motion, arriving with the weave.
-        nodes.current.forEach((node,i)=>{
-          if(!node)return;
-          const direction=i%2===0?-1:1;
-          node.style.transform=`translate3d(0,${direction*eased*(20+(i%3)*10)}px,0)`;
-          node.style.opacity=String(scene.t2*(.42+eased*.48));
-        });
-        const h=hoverRef.current;
-        if(h&&tipRef.current){
-          const s=scene.project(h.index);
-          tipRef.current.style.transform=`translate3d(${s.x+canvasLeft}px,${s.y}px,0)`;
-        }
-        if(panelRef.current){
-          panelRef.current.style.opacity=String(Math.max(0,eased-.05));
-          panelRef.current.style.transform=`translate3d(-50%,${(1-eased)*95}px,0) scale(${.94+eased*.06})`;
-        }
-        return;
-      }
-      const open=Math.min(Math.max((p-.30)/.56,0),1);
+      // Enter: the weave draws itself. With data the points then gather onto it (.16-.74);
+      // either way it finally parts to reveal the panel.
+      const draw=band(p,.02,.3);
+      const open=scene?band(p,.78,.96):band(p,.38,.9);
       const eased=1-Math.pow(1-open,3);
-
-      if(upperRef.current){
-        upperRef.current.style.transform=`translate3d(0,${-eased*205}px,0) rotate(${-eased*1.25}deg)`;
-      }
-      if(lowerRef.current){
-        lowerRef.current.style.transform=`translate3d(0,${eased*215}px,0) rotate(${eased*1.4}deg)`;
-      }
+      const map=mapRef.current;
+      map?.style.setProperty("--weave-draw",String(draw));
+      map?.style.setProperty("--network-open",String(eased));
+      const upAngle=-eased*1.25,downAngle=eased*1.4;
+      if(upperRef.current)upperRef.current.style.transform=`translate3d(0,${-eased*205}px,0) rotate(${upAngle}deg)`;
+      if(lowerRef.current)lowerRef.current.style.transform=`translate3d(0,${eased*215}px,0) rotate(${downAngle}deg)`;
       if(panelRef.current){
         panelRef.current.style.opacity=String(Math.max(0,eased-.05));
         panelRef.current.style.transform=`translate3d(-50%,${(1-eased)*95}px,0) scale(${.94+eased*.06})`;
       }
-      if(mapRef.current){
-        mapRef.current.style.setProperty("--network-open",String(eased));
-      }
 
-      nodes.current.forEach((node,i)=>{
+      const {sx,sy}=mapScale.current;
+      pins.current.forEach((pin,i)=>{
+        const node=nodes.current[i];
         if(!node)return;
-        const direction=i%2===0?-1:1;
-        const amount=eased*(20+(i%3)*10);
-        node.style.transform=`translate3d(0,${direction*amount}px,0)`;
-        node.style.opacity=String(.42+eased*.48);
+        const angle=((pin.side>0?upAngle:downAngle)*Math.PI)/180;
+        const dx=pin.x-pin.cx,dy=pin.y-pin.cy;
+        const x=pin.cx+dx*Math.cos(angle)-dy*Math.sin(angle);
+        const y=pin.cy+dx*Math.sin(angle)+dy*Math.cos(angle)+(pin.side>0?-205:215)*eased;
+        const left=Math.min(Math.max(x*sx-pin.w/2,0),(map?.clientWidth??0)-pin.w);
+        node.style.transform=`translate3d(${left}px,${y*sy-26-pin.h}px,0)`;
+        node.style.opacity=String(Math.min(Math.max((draw-pin.t)*7,0),1)*(1-eased*.35));
       });
+
+      if(scene){
+        scene.update(p,frame.now,eased,1-open*.25);
+        scene.render();
+        setStage(scene.t2>.5?2:scene.t1>.5?1:0);
+        const h=hoverRef.current;
+        if(h&&tipRef.current){
+          const s=scene.project(h.index);
+          tipRef.current.style.transform=`translate3d(${s.x+net.geometry.current.canvasLeft}px,${s.y}px,0)`;
+        }
+      }
   });
 
   useEffect(()=>{
@@ -669,15 +703,15 @@ function Network() {
             </defs>
 
             <g ref={upperRef} className="network-v16-weave-upper">
-              <path className="network-v16-blur" d="M30 535 C165 115 455 55 665 270 S1050 585 1160 95"/>
-              <path className="network-v16-line" d="M30 535 C165 115 455 55 665 270 S1050 585 1160 95"/>
+              <path pathLength={1} className="network-v16-blur" d="M30 535 C165 115 455 55 665 270 S1050 585 1160 95"/>
+              <path pathLength={1} className="network-v16-line" d="M30 535 C165 115 455 55 665 270 S1050 585 1160 95"/>
               <path className="network-v16-ribbon" d="M10 235 C210 620 505 660 770 385 S1035 70 1190 515"/>
               <path className="network-v16-ribbon-thin" d="M10 235 C210 620 505 660 770 385 S1035 70 1190 515"/>
             </g>
 
             <g ref={lowerRef} className="network-v16-weave-lower">
-              <path className="network-v16-blur" d="M40 175 C235 555 505 665 735 390 S1000 85 1180 520"/>
-              <path className="network-v16-line" d="M40 175 C235 555 505 665 735 390 S1000 85 1180 520"/>
+              <path pathLength={1} className="network-v16-blur" d="M40 175 C235 555 505 665 735 390 S1000 85 1180 520"/>
+              <path pathLength={1} className="network-v16-line" d="M40 175 C235 555 505 665 735 390 S1000 85 1180 520"/>
               <path className="network-v16-ribbon" d="M25 510 C205 105 485 65 700 320 S1010 610 1185 155"/>
               <path className="network-v16-ribbon-thin" d="M25 510 C205 105 485 65 700 320 S1010 610 1185 155"/>
             </g>
@@ -710,10 +744,11 @@ function Network() {
             </div>
           </div>
 
-          <div className="network-v16-caption">
-            <span>{net.active?stageText:"PEOPLE / KNOWLEDGE / ACCESS / MOMENTUM"}</span>
-            <span>{net.active?(net.problems?"EVERY POINT IS REAL — POINT AT ONE TO READ IT":"SCROLL — WATCH IT FIND ITS SHAPE"):"SCROLL DOWN — LET THE WEAVE OPEN"}</span>
-          </div>
+          {/* Only the live scene has something to caption; the drawn weave's panel already says it. */}
+          {net.active&&<div className="network-v16-caption">
+            <span>{stageText}</span>
+            <span>{net.problems?"EVERY POINT IS REAL — POINT AT ONE TO READ IT":"SCROLL — WATCH IT FIND ITS SHAPE"}</span>
+          </div>}
         </div>
 
         <div className="network-v16-bottom">
@@ -804,91 +839,47 @@ function ActRail(){
   </nav>;
 }
 
-// Where the page changes colour, the incoming tone rises as a skyline of the brand mark's
-// slanted, rounded bars. Its edge travels with the incoming section's top (so there is never
-// a straight cut or a muddy in-between grey), and the bars converge to a flat edge as that
-// section reaches the top of the screen, where the base colour takes over.
-const BAR_PATTERN=[8,12,19,15,11,22].map(h=>h/22);
-
 function PageField(){
   const ref=useRef<HTMLDivElement>(null);
-  const svgRef=useRef<SVGSVGElement>(null);
-  const pathRef=useRef<SVGPathElement>(null);
   useEffect(()=>{
-    let edges:{top:number,to:string}[]=[];
-    let first="ink";
+    let marks:{top:number,tone:string}[]=[];
     const measure=()=>{
-      const marks=Array.from(document.querySelectorAll<HTMLElement>("[data-tone]"))
-        .map(el=>({top:el.getBoundingClientRect().top+window.scrollY,tone:el.dataset.tone||"ink"}))
-        .sort((a,b)=>a.top-b.top);
-      first=marks[0]?.tone??"ink";
-      edges=[];
-      let current=first;
-      marks.forEach(m=>{if(m.tone!==current){edges.push({top:m.top,to:m.tone});current=m.tone;}});
+      marks=Array.from(document.querySelectorAll<HTMLElement>("[data-tone]")).map(el=>({top:el.getBoundingClientRect().top+window.scrollY,tone:el.dataset.tone||"ink"}));
     };
-    const SLANT=Math.tan(15*Math.PI/180);
-    let raf=0,appliedBase="",appliedFill="",appliedMid="",hidden=false;
+    let raf=0,applied="",appliedMid="",appliedTop="";
     const schedule=()=>{if(!raf)raf=requestAnimationFrame(tick)};
     const remeasure=()=>{measure();schedule()};
     const tick=()=>{
       raf=0;
-      const field=ref.current,svg=svgRef.current,path=pathRef.current;
-      if(!field||!svg||!path)return;
-      const y=window.scrollY,vh=window.innerHeight,vw=window.innerWidth;
-      const amp=Math.min(vh*.28,240);
-      let base=first,next:{top:number,to:string}|null=null,index=0;
-      for(let i=0;i<edges.length;i++){
-        if(edges[i].top<=y)base=edges[i].to;
-        else{if(edges[i].top-y<vh+amp){next=edges[i];index=i;}break;}
+      if(marks.length&&ref.current){
+        const focus=window.scrollY+window.innerHeight*.5;
+        const w=window.innerHeight*.6;
+        let color=TONES[marks[0].tone];
+        let midTone=marks[0].tone;
+        for(let i=1;i<marks.length;i++){
+          const t=ease(band(focus,marks[i].top-w/2,marks[i].top+w/2));
+          if(t===0)break;
+          color=t===1?TONES[marks[i].tone]:mixHex(TONES[marks[i-1].tone],TONES[marks[i].tone],t);
+          if(t>=.5)midTone=marks[i].tone;
+          if(t<1)break;
+        }
+        if(color!==applied){ref.current.style.backgroundColor=color;applied=color;}
+        // Which tone is on screen, for chrome that adapts to it (act rail at mid-screen, header at the top).
+        const root=ref.current.parentElement;
+        if(midTone!==appliedMid){root?.setAttribute("data-field",midTone);appliedMid=midTone;}
+        let topTone=marks[0].tone;
+        for(const m of marks){if(m.top<=window.scrollY+40)topTone=m.tone;else break;}
+        if(topTone!==appliedTop){root?.setAttribute("data-top",topTone);appliedTop=topTone;}
       }
-      const color=TONES[base];
-      if(color!==appliedBase){field.style.backgroundColor=color;appliedBase=color;}
-      // The tone at mid-screen, for chrome that sits there (the act rail).
-      const midTone=next&&next.top-y-amp*.5<vh*.5?next.to:base;
-      if(midTone!==appliedMid){field.parentElement?.setAttribute("data-field",midTone);appliedMid=midTone;}
-      if(!next){if(!hidden){svg.style.visibility="hidden";hidden=true;}return;}
-      if(hidden){svg.style.visibility="visible";hidden=false;}
-      const fill=TONES[next.to];
-      if(fill!==appliedFill){path.setAttribute("fill",fill);appliedFill=fill;}
-      svg.setAttribute("viewBox",`0 0 ${vw} ${vh}`);
-      // One outline for the whole skyline: every bar shares its slanted sides with its
-      // neighbours, so there are no seams. Bars lean like the logo's (tops to the right):
-      // column k's boundary at height Y sits at x = (k-1)*w + SLANT*(vh - Y) - SLANT*(vh + amp).
-      const edge=next.top-y;
-      const spread=Math.min(Math.max(edge/(vh*.7),0),1);
-      // Thin bars read as a signal rather than blobs; their caps round off only while the edge
-      // is moving and flatten to a clean line as the section docks.
-      const w=Math.min(Math.max(vw*.0135,16),30),r=(w/2)*spread;
-      const count=Math.ceil((vw+SLANT*(vh+amp))/w)+2;
-      const x=(k:number,Y:number)=>(k-1)*w+SLANT*(vh-Y)-SLANT*(vh+amp);
-      // The logo's six-bar rhythm under a slow envelope, so it reads as one signal, not a pattern.
-      const top=(i:number)=>{
-        const envelope=.45+.55*(.5+.5*Math.sin(i*.19+index*1.7));
-        return edge-amp*BAR_PATTERN[(i+index*2)%BAR_PATTERN.length]*envelope*spread;
-      };
-      let d=`M${x(0,vh+10).toFixed(1)} ${vh+10} L${x(0,top(0)+r).toFixed(1)} ${(top(0)+r).toFixed(1)}`;
-      for(let i=0;i<count;i++){
-        const T=top(i)+r;
-        d+=r>.5
-          ?` L${x(i,T).toFixed(1)} ${T.toFixed(1)} A${(w/2).toFixed(1)} ${r.toFixed(1)} 0 0 1 ${x(i+1,T).toFixed(1)} ${T.toFixed(1)}`
-          :` L${x(i,T).toFixed(1)} ${T.toFixed(1)} L${x(i+1,T).toFixed(1)} ${T.toFixed(1)}`;
-        const N=i+1<count?top(i+1)+r:vh+10;
-        d+=` L${x(i+1,N).toFixed(1)} ${N.toFixed(1)}`;
-      }
-      d+=" Z";
-      path.setAttribute("d",d);
     };
     remeasure();
     document.fonts?.ready.then(remeasure);
     const ro=new ResizeObserver(remeasure);
     ro.observe(document.body);
     window.addEventListener("scroll",schedule,{passive:true});
-    window.addEventListener("resize",schedule);
-    return()=>{ro.disconnect();window.removeEventListener("scroll",schedule);window.removeEventListener("resize",schedule);cancelAnimationFrame(raf)};
+    return()=>{ro.disconnect();window.removeEventListener("scroll",schedule);cancelAnimationFrame(raf)};
   },[]);
-  return <div className="page-field" ref={ref} aria-hidden="true">
-    <svg className="page-field-bars" ref={svgRef} preserveAspectRatio="none"><path ref={pathRef}/></svg>
-  </div>;
+  return <div className="page-field" ref={ref} aria-hidden="true"/>;
 }
 
 export default function Landing(){
