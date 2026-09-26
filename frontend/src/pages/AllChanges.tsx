@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { generateIdeaSlug } from "@/utils/slugUtils";
 
 interface ChangeItem {
-  _id: string;
+  id?: string;
+  _id?: string;
   userName: string;
   userAvatar?: string;
   stageName: string;
