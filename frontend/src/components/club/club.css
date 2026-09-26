@@ -7,7 +7,7 @@ body:has(.sc-nav.is-hidden) .cl{--cl-top:0px}
 .cl-tabs{display:flex;gap:clamp(20px,3.4vw,52px);max-width:1600px;margin:0 auto;padding:0 7vw;overflow-x:auto;scrollbar-width:none}
 .cl-tabs::-webkit-scrollbar{display:none}
 .cl-tab{position:relative;display:inline-flex;align-items:baseline;gap:8px;flex:none;padding:20px 0 18px;border:0;background:none;color:hsl(var(--muted-foreground));font:11px var(--mono);letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:color .2s}
-.cl-tab span{color:rgba(247,245,239,.28);font-size:9px}
+.cl-tab span{color:rgba(247,245,239,.5);font-size:9px}
 .cl-tab:hover,.cl-tab[data-state=active]{color:var(--white)}
 .cl-tab[data-state=active] span{color:var(--lime)}
 .cl-tab[data-state=active]:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--lime)}

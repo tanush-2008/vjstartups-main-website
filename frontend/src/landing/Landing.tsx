@@ -76,10 +76,22 @@ function Cursor() {
 
 function SmoothScroll() {
   useEffect(()=>{
-    const lenis=new Lenis({duration:1.15, smoothWheel:true, syncTouch:true, wheelMultiplier:.9, touchMultiplier:1});
-    let raf=0;
-    const frame=(time:number)=>{lenis.raf(time);raf=requestAnimationFrame(frame)};
-    raf=requestAnimationFrame(frame);
+    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+    // Lenis measures the page on creation and on every resize; creating it during load cost
+    // ~350ms of forced layout while images and fonts were still arriving. Start it once the
+    // page is idle, or on the first scroll input, whichever comes first.
+    let lenis:Lenis|null=null,raf=0;
+    const frame=(time:number)=>{lenis?.raf(time);raf=requestAnimationFrame(frame)};
+    const start=()=>{
+      if(lenis)return lenis;
+      lenis=new Lenis({duration:1.15, smoothWheel:true, syncTouch:true, wheelMultiplier:.9, touchMultiplier:1});
+      raf=requestAnimationFrame(frame);
+      return lenis;
+    };
+    const idle=window.requestIdleCallback?window.requestIdleCallback(start,{timeout:2500}):window.setTimeout(start,1500);
+    const early=()=>{start()};
+    window.addEventListener("wheel",early,{once:true,passive:true});
+    window.addEventListener("touchstart",early,{once:true,passive:true});
     const click=(e:MouseEvent)=>{
       const anchor=(e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
       if(!anchor)return;
@@ -87,11 +99,17 @@ function SmoothScroll() {
       if(!id||id==="#")return;
       const target=document.querySelector<HTMLElement>(id);
       if(!target)return;
-      e.preventDefault();lenis.scrollTo(target,{offset:-72,duration:1.2});
+      e.preventDefault();start().scrollTo(target,{offset:-72,duration:1.2});
       history.replaceState(null,"",id);
     };
     document.addEventListener("click",click);
-    return()=>{document.removeEventListener("click",click);cancelAnimationFrame(raf);lenis.destroy()};
+    return()=>{
+      document.removeEventListener("click",click);
+      window.removeEventListener("wheel",early);
+      window.removeEventListener("touchstart",early);
+      if(window.cancelIdleCallback)window.cancelIdleCallback(idle);else window.clearTimeout(idle);
+      cancelAnimationFrame(raf);lenis?.destroy();
+    };
   },[]);
   return null;
 }
@@ -99,7 +117,7 @@ function SmoothScroll() {
 const INTRO_KEY="vj-intro-seen";
 
 function Intro() {
-  const [skip]=useState(()=>{try{return sessionStorage.getItem(INTRO_KEY)==="1";}catch{return false;}});
+  const [skip]=useState(()=>{if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return true;try{return sessionStorage.getItem(INTRO_KEY)==="1";}catch{return false;}});
   const [done,setDone]=useState(false);
   const [p,setP]=useState(0);
 
@@ -198,8 +216,10 @@ function Intro() {
         <span>{current[0]} / 03</span>
       </div>
 
-      <div className="intro-v16-pulse" style={{left:`${12+p*.72}%`,top:`${24+Math.sin(p*.08)*11}%`}}/>
-      <div className="intro-v16-pulse pink" style={{left:`${76-p*.33}%`,top:`${70-Math.sin(p*.05)*13}%`}}/>
+      {/* Moved with `translate` (the overlay is viewport-sized, so vw/vh match the old %):
+          animating left/top registered as a layout shift every frame. */}
+      <div className="intro-v16-pulse" style={{translate:`${12+p*.72}vw ${24+Math.sin(p*.08)*11}vh`}}/>
+      <div className="intro-v16-pulse pink" style={{translate:`${76-p*.33}vw ${70-Math.sin(p*.05)*13}vh`}}/>
     </div>
   );
 }
@@ -726,7 +746,7 @@ export default function Landing(){
     schedule();
     return()=>{stop();window.removeEventListener("scroll",schedule);cancelAnimationFrame(raf)};
   },[]);
-  return <div className="vj-landing"><Intro/><Cursor/><SmoothScroll/><PageField/><div className="global-progress"><span ref={progressRef}/></div><SiteNav overlay brandHref="#top"/><main><Hero/><section className="statement dark" data-tone="ink"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark" data-tone="ink"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>{String(counters.funded).padStart(2,"0")}</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" data-tone="pink" id="contact">
+  return <div className="vj-landing"><Intro/><Cursor/><SmoothScroll/><PageField/><div className="global-progress"><span ref={progressRef}/></div><a href="#main" className="skip-link">Skip to content</a><SiteNav overlay brandHref="#top"/><main id="main" tabIndex={-1}><Hero/><section className="statement dark" data-tone="ink"><Reveal><span className="chapter-label">00 / THE PREMISE</span><h2>DON&apos;T START<br/><span>WITH THE IDEA.</span></h2><p>Start with the thing that keeps breaking.</p></Reveal></section><Morph/><Starting/><Journey/><Sphere/><Hubs/><WorkField/><Ventures/><Network/><Community/><section className="recognition dark" data-tone="ink"><Reveal><span className="chapter-label">08A / SIGNALS</span><h2>PROOF IS A<br/><i>MILESTONE.</i></h2><p>Recognition and funding are signals along the journey, not the destination.</p></Reveal><div className="recognition-list"><div><span>2024</span><b>Best Innovation Award</b><small>National Startup Competition</small></div><div><span>₹2.8Cr</span><b>Total funding raised</b><small>Across the current funded portfolio</small></div><div><span>{String(counters.funded).padStart(2,"0")}</span><b>Funded startups</b><small>Ventures that moved beyond the idea stage</small></div></div></section><FAQ/><section className="contact-v13 dark" data-tone="pink" id="contact">
   <div className="contact-v13-back" aria-hidden="true">
     <span>QUESTION</span><span>BUILD</span><span>PROVE</span><span>IMPACT</span>
   </div>

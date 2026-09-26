@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { Fragment, ReactNode, useEffect, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,10 @@ export function PageHero({
 }: PageHeroProps) {
   const { lead, accent } = splitTitle(title);
 
+  useEffect(() => {
+    document.title = `${title} — VJ Startups`;
+  }, [title]);
+
   const renderAction = (action?: HeroAction) => {
     if (!action) return null;
     const button = (
@@ -76,8 +80,19 @@ export function PageHero({
         </div>
 
         <h1 className="ph-title">
-          {lead}
-          {accent && <> <em>{accent}</em></>}
+          <span className="sr-only">{title}</span>
+          {lead.split(" ").map((word, i) => (
+            <Fragment key={i}>
+              <span className="ph-w" aria-hidden="true">
+                <span style={{ "--i": i } as CSSProperties}>{word}</span>
+              </span>{" "}
+            </Fragment>
+          ))}
+          {accent && (
+            <span className="ph-w" aria-hidden="true">
+              <em style={{ "--i": lead.split(" ").length } as CSSProperties}>{accent}</em>
+            </span>
+          )}
         </h1>
 
         <div className="ph-foot">

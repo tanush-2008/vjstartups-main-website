@@ -48,3 +48,25 @@
 .auth-legal{margin:0;color:hsl(var(--muted-foreground));font:10px var(--mono);letter-spacing:.08em;line-height:1.7;text-transform:uppercase}
 .auth-legal a{color:var(--lime);text-decoration:none}
 @media(max-width:900px){.auth{grid-template-columns:1fr;align-items:start;gap:40px;padding:48px 18px 80px}}
+
+/* Entrance: title words rise out of a mask, then the details follow. Held while the route
+   curtain is down (html.pt-busy) so it plays as the curtain lifts. */
+.ph-w{display:inline-block;overflow:hidden;margin:-.12em 0 -.06em;padding:.12em 0 .06em;vertical-align:top}
+.ph-w>span,.ph-w>em{display:inline-block;transform:translate3d(0,108%,0);animation:ph-rise 1s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.1s + var(--i,0)*.07s)}
+@keyframes ph-rise{to{transform:none}}
+.ph-meta,.ph-desc,.ph-actions,.ph-stats>div,.ph-extra,.ph-note{opacity:0;animation:ph-fade .8s cubic-bezier(.2,.7,.2,1) forwards}
+.ph-meta{animation-delay:.05s}
+.ph-desc,.ph-note{animation-delay:.4s}
+.ph-actions,.ph-extra{animation-delay:.5s}
+.ph-stats>div:nth-child(1){animation-delay:.5s}
+.ph-stats>div:nth-child(2){animation-delay:.57s}
+.ph-stats>div:nth-child(3){animation-delay:.64s}
+.ph-stats>div:nth-child(4){animation-delay:.71s}
+.ph-ghost{animation:ph-ghost 1.6s cubic-bezier(.2,.7,.2,1) both}
+@keyframes ph-fade{from{opacity:0;transform:translate3d(0,18px,0)}to{opacity:1;transform:none}}
+@keyframes ph-ghost{from{opacity:0;transform:translate3d(4%,0,0)}to{opacity:1;transform:none}}
+.pt-busy .ph *,.pt-busy .ph{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){
+  .ph-w>span,.ph-w>em,.ph-meta,.ph-desc,.ph-actions,.ph-stats>div,.ph-extra,.ph-note,.ph-ghost{animation:none;opacity:1;transform:none}
+}
+

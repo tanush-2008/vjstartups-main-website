@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
+import { PageTransition } from "./components/site/PageTransition";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -36,10 +37,20 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PostAnnouncement = lazy(() => import("./pages/PostAnnouncement"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+const SITE_TITLE = "VJ Startups — Turn questions into ventures";
+
+// Pages with a PageHero title themselves; these are the ones without one.
+const ROUTE_TITLES: Record<string, string> = {
+  "/journey": "Startup journey",
+  "/login": "Log in",
+};
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    const title = ROUTE_TITLES[pathname] ?? (pathname.startsWith("/update-problem") ? "Update problem" : null);
+    document.title = title ? `${title} — VJ Startups` : SITE_TITLE;
   }, [pathname]);
   return null;
 };
@@ -59,6 +70,7 @@ const App = () => (
         <UserProvider>
           <BrowserRouter>
             <ScrollToTop />
+            <PageTransition />
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route element={<Layout />}>

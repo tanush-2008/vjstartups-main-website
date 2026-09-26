@@ -312,7 +312,7 @@ const ProblemDetail = () => {
             <div className="flex items-center gap-2">
               {canEditDelete && (
                 <>
-                  <Link to={`/update-problem/${problem.problemId}`} state={{ problem }}>
+                  <Link to={`/update-problem/${problem.problemId}`} state={{ problem }} data-no-transition>
                     <Button variant="ghost" size="sm" className="text-problem-primary hover:bg-red-50 hover:text-red-700 transition-colors">
                       <Edit size={16} className="mr-2" />
                       Edit
