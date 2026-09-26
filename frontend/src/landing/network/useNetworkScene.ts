@@ -25,7 +25,8 @@ const supportsWebGL = () => {
 /**
  * Loads three.js and the network data once the section is within ~1.5 screens, then builds
  * the scene. Nothing is fetched or created for visitors who never scroll that far, prefer
- * reduced motion, or have no WebGL; those keep the original drawn network.
+ * reduced motion, have no WebGL, or when the API is unreachable; those keep the original
+ * drawn network.
  */
 export function useNetworkScene(refs: Refs, apiBase: string, ventures: readonly string[]) {
   const scene = useRef<NetworkScene | null>(null);
@@ -53,7 +54,8 @@ export function useNetworkScene(refs: Refs, apiBase: string, ventures: readonly 
           loadNetworkData(apiBase, ventures).catch(() => null),
         ]);
         const canvas = refs.canvas.current;
-        if (cancelled || !canvas) return;
+        // Without real records the field would be empty dust; the drawn V18 weave is better.
+        if (cancelled || !canvas || !data) return;
 
         const compact = window.innerWidth < 700;
         const instance = new mod.NetworkScene(canvas, data, { compact, motion: true });

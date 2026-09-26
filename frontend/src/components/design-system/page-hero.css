@@ -51,7 +51,9 @@
 
 /* Entrance: title words rise out of a mask, then the details follow. Held while the route
    curtain is down (html.pt-busy) so it plays as the curtain lifts. */
-.ph-w{display:inline-block;overflow:hidden;margin:-.12em 0 -.06em;padding:.12em 0 .06em;vertical-align:top}
+/* Right padding (cancelled by the margin) keeps the last glyph's overhang, which the tight
+   letter-spacing pushes past the word box, inside the mask. */
+.ph-w{display:inline-block;overflow:hidden;margin:-.12em -.14em -.06em 0;padding:.12em .14em .06em 0;vertical-align:top}
 .ph-w>span,.ph-w>em{display:inline-block;transform:translate3d(0,108%,0);animation:ph-rise 1s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.1s + var(--i,0)*.07s)}
 @keyframes ph-rise{to{transform:none}}
 .ph-meta,.ph-desc,.ph-actions,.ph-stats>div,.ph-extra,.ph-note{opacity:0;animation:ph-fade .8s cubic-bezier(.2,.7,.2,1) forwards}
