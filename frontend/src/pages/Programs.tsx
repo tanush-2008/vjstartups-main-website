@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Calendar, Users, Trophy, Clock, ArrowRight, CheckCircle, Circle, PlayCircle } from "lucide-react";
 import { startupPrograms, StartupProgram } from "@/data/startupPrograms";
-import ExploreProblemsModal from "@/components/ExploreProblemsModal";
 import { PageHero } from "@/components/design-system/PageHero";
 
 const Programs = () => {
