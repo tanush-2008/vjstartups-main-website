@@ -24,6 +24,7 @@ const SuccessStories = () => {
   }
 
   const successStories = getSuccessStoriesByProgram(programId);
+  const people = successStories.reduce((acc, s) => acc + s.participants.length, 0);
 
   return (
     <div className="page-shell lx" style={{ "--lx-accent": "var(--lime)" } as CSSProperties}>
@@ -33,21 +34,20 @@ const SuccessStories = () => {
         description={`${program.title}. What participants built, and what came of it.`}
         backLink={{ label: program.title, to: `/programs/${programId}` }}
         stats={[
-          { value: String(successStories.length), label: "Stories" },
-          { value: String(successStories.reduce((acc, s) => acc + s.participants.length, 0)), label: "Participants" },
+          { value: String(successStories.length), label: successStories.length === 1 ? "Story" : "Stories" },
+          { value: String(people), label: people === 1 ? "Participant" : "Participants" },
         ]}
       />
 
       <section className="lx-section">
         {successStories.length === 0 ? (
           <div className="lx-empty">
-            <strong>Stories coming soon</strong>
-            We're documenting what participants of this program achieved.
+            <strong>No stories written up for this program yet</strong>
           </div>
         ) : (
-          <div className="lx-grid">
+          <div className="ss-features">
             {successStories.map((story) => (
-              <SuccessStoryCard key={story.id} story={story} programId={programId} />
+              <SuccessStoryCard key={story.id} story={story} programId={programId} feature />
             ))}
           </div>
         )}
