@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Plus, Lightbulb, AlertCircle, MessageSquare, Users, UserCheck, ExternalLink, BookOpen, Trophy } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUser } from '../pages/UserContext';
 
@@ -10,7 +9,6 @@ interface FABAction {
   label: string;
   action: () => void;
   color: string;
-  bgColor: string;
 }
 
 const FloatingActionButton = () => {
@@ -34,8 +32,7 @@ const FloatingActionButton = () => {
           navigate('/problems?action=submit');
           setIsOpen(false);
         },
-        color: 'text-red-600',
-        bgColor: 'bg-red-50 hover:bg-red-100'
+        color: 'text-pink-400'
       },
       {
         icon: Lightbulb,
@@ -44,8 +41,7 @@ const FloatingActionButton = () => {
           navigate('/ideas?action=submit');
           setIsOpen(false);
         },
-        color: 'text-yellow-600',
-        bgColor: 'bg-yellow-50 hover:bg-yellow-100'
+        color: 'text-lime-400'
       },
       {
         icon: MessageSquare,
@@ -55,8 +51,7 @@ const FloatingActionButton = () => {
           window.open('https://forms.gle/MoSnmC9PhxXq5CmD9', '_blank');
           setIsOpen(false);
         },
-        color: 'text-blue-600',
-        bgColor: 'bg-blue-50 hover:bg-blue-100'
+        color: 'text-white'
       }
     ];
 
@@ -70,8 +65,7 @@ const FloatingActionButton = () => {
           navigate('/startup-form');
           setIsOpen(false);
         },
-        color: 'text-emerald-600',
-        bgColor: 'bg-emerald-50 hover:bg-emerald-100'
+        color: 'text-violet-400'
       });
     }
 
@@ -85,8 +79,7 @@ const FloatingActionButton = () => {
         window.open('https://chat.whatsapp.com/IBfChZgpT8qJoHKbBWMvqA', '_blank');
         setIsOpen(false);
       },
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50 hover:bg-gray-100'
+      color: 'text-white'
     });
 
     return baseActions;
@@ -104,21 +97,18 @@ const FloatingActionButton = () => {
           {actions.map((action, index) => (
             <Tooltip key={index}>
               <TooltipTrigger asChild>
-                <Button
+                <button
                   onClick={action.action}
-                  className={`
-                    w-14 h-14 min-h-[48px] min-w-[48px] rounded-full shadow-lg border border-gray-200 
-                    ${action.bgColor} ${action.color}
-                    transform transition-all duration-300 hover:scale-110
-                  `}
+                  aria-label={action.label}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/75 backdrop-blur-md transition-transform duration-300 hover:scale-110 hover:border-white/30 ${action.color}`}
                   style={{
                     animation: `bounceIn 0.5s ease-out ${index * 50}ms backwards`
                   }}
                 >
-                  <action.icon size={22} />
-                </Button>
+                  <action.icon size={20} />
+                </button>
               </TooltipTrigger>
-              <TooltipContent side="left" className="bg-gray-900 text-white">
+              <TooltipContent side="left" className="border-white/10 bg-black text-white font-mono text-[10px] uppercase tracking-[0.12em]">
                 <p>{action.label}</p>
               </TooltipContent>
             </Tooltip>
@@ -128,24 +118,16 @@ const FloatingActionButton = () => {
         {/* Main FAB - Enhanced size and glow animation */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
+            <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`
-                relative w-20 h-20 min-h-[56px] min-w-[56px] rounded-full shadow-2xl
-                bg-gradient-to-r from-vj-accent to-purple-600
-                hover:from-vj-accent/90 hover:to-purple-600/90
-                text-white border-0
-                transform transition-all duration-300 hover:scale-110
-                ${isOpen ? 'rotate-45' : 'rotate-0'}
-              `}
+              aria-label={isOpen ? 'Close quick actions' : 'Open quick actions'}
+              aria-expanded={isOpen}
+              className={`flex h-[56px] w-[56px] items-center justify-center rounded-full bg-lime-400 text-black shadow-[0_12px_32px_-10px_rgba(215,255,99,0.55)] transition-transform duration-300 hover:scale-105 ${isOpen ? 'rotate-45' : 'rotate-0'}`}
             >
-              <span className="absolute inset-0 rounded-full bg-purple-500/40 animate-ping opacity-75" />
-              <span className="absolute inset-0 rounded-full ring-4 ring-purple-500/50 animate-pulse" />
-              <span className="absolute inset-0 rounded-full ring-8 ring-purple-400/20 animate-pulse" style={{ animationDelay: '0.5s' }} />
-              <Plus size={32} className="relative z-10 transition-transform duration-300" />
-            </Button>
+              <Plus size={26} />
+            </button>
           </TooltipTrigger>
-          <TooltipContent side="left" className="bg-gray-900 text-white">
+          <TooltipContent side="left" className="border-white/10 bg-black text-white font-mono text-[10px] uppercase tracking-[0.12em]">
             <p>{isOpen ? 'Close actions' : 'Quick actions'}</p>
           </TooltipContent>
         </Tooltip>
@@ -154,7 +136,7 @@ const FloatingActionButton = () => {
       {/* Backdrop */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/10"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
           onClick={() => setIsOpen(false)}
         />
       )}
