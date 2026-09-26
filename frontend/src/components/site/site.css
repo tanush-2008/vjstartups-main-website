@@ -10,7 +10,7 @@
 .sc-nav.is-hidden{transform:translateY(-100%)}
 .sc-nav-inner{max-width:1600px;height:76px;margin:auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
 .sc-nav a{text-decoration:none}
-:is(.sc-nav,.sc-footer) .sc-brand{display:inline-flex;align-items:center;gap:9px;color:var(--white);font-family:var(--sans);font-size:10px;font-weight:800;letter-spacing:-.04em;text-decoration:none}
+.sc-brand,:is(.sc-nav,.sc-footer) .sc-brand{display:inline-flex;align-items:center;gap:9px;color:var(--white);font-family:var(--sans);font-size:10px;font-weight:800;letter-spacing:-.04em;text-decoration:none}
 .sc-brand-symbol{display:flex;align-items:flex-end;gap:2px;height:24px}
 .sc-brand-symbol i{width:4px;border-radius:999px;background:var(--lime);transform:skewX(-15deg)}
 .sc-brand-symbol i:nth-child(1){height:8px}.sc-brand-symbol i:nth-child(2){height:12px}.sc-brand-symbol i:nth-child(3){height:19px}
