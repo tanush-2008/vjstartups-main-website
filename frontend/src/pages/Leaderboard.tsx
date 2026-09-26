@@ -8,9 +8,7 @@ interface LeaderboardEntry {
   email: string;
   name: string;
   avatar?: string;
-  stagesCompleted: number;
   lastActivityAt: string;
-  badgeType: 'founder' | 'innovator' | 'pioneer';
   reputationScore?: number;
 }
 
@@ -30,32 +28,8 @@ const getTimeAgo = (dateString: string): string => {
   return `${Math.floor(diffDays / 7)}w ago`;
 };
 
-const getStageAchievementName = (stagesCompleted: number): string => {
-  const stages = [
-    { id: 'problem', name: 'Problem Pathfinder' },
-    { id: 'ideation', name: 'Concept Architect' },
-    { id: 'research', name: 'Feasibility Explorer' },
-    { id: 'validation', name: 'Validation Champion' },
-    { id: 'prototype', name: 'Prototype Builder' },
-    { id: 'mvp', name: 'Launch Leader' },
-    { id: 'scaling', name: 'Scale Strategist' }
-  ];
-
-  if (stagesCompleted <= 0) {
-    return 'Journey Starter';
-  }
-
-  const stageIndex = Math.min(stagesCompleted, stages.length) - 1;
-  return stages[stageIndex]?.name || 'Journey Achiever';
-};
-
-const achievementTier = (stagesCompleted: number) => {
-  if (stagesCompleted >= 7) return "var(--pink)";
-  if (stagesCompleted >= 5) return "var(--violet)";
-  if (stagesCompleted >= 3) return "var(--lime)";
-  if (stagesCompleted >= 1) return "var(--white)";
-  return "hsl(var(--muted-foreground))";
-};
+const initials = (name: string) =>
+  name.split(/\s+/).filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
 
 const Leaderboard = () => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -78,9 +52,7 @@ const Leaderboard = () => {
           email: profile.user?.email || '',
           name: `${profile.user?.first_name || ''} ${profile.user?.last_name || ''}`.trim() || profile.user?.username || 'Member',
           avatar: profile.user?.avatar,
-          stagesCompleted: Math.min(Math.round(profile.reputation_score / 10), 7), // cap stages at 7 for visuals
           lastActivityAt: profile.updated_at || new Date().toISOString(),
-          badgeType: 'founder',
           reputationScore: profile.reputation_score
         }));
         setEntries(mappedEntries);
@@ -101,10 +73,10 @@ const Leaderboard = () => {
       <PageHero
         eyebrow="Virtual startup journey"
         title="Leaderboard"
-        description="All users ranked by completed stages."
+        description="Members ranked by their reputation score on the platform."
         backLink={{ label: "Home", to: "/" }}
         stats={[
-          { value: String(entries.length), label: "Ranked users" },
+          { value: String(entries.length), label: entries.length === 1 ? "Ranked member" : "Ranked members" },
           { value: "Live", label: "Refreshes every 30s" },
         ]}
       />
@@ -122,21 +94,18 @@ const Leaderboard = () => {
             {entries.map((entry) => (
               <li key={entry.email} className={`lb-row${entry.rank <= 3 ? " is-top" : ""}`}>
                 <span className="lb-rank">{String(entry.rank).padStart(2, "0")}</span>
-                <img
-                  className="lb-avatar"
-                  src={entry.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.name)}&size=96&background=161614&color=f7f5ef`}
-                  alt=""
-                />
+                {entry.avatar ? (
+                  <img className="lb-avatar" src={entry.avatar} alt="" />
+                ) : (
+                  <i className="lb-avatar lb-initials" aria-hidden="true">{initials(entry.name)}</i>
+                )}
                 <div className="lb-who">
                   <b>{entry.name}</b>
-                  <span>{entry.stagesCompleted} of 7 stages</span>
+                  <span>Active {getTimeAgo(entry.lastActivityAt)}</span>
                 </div>
-                <span className="lb-badge" style={{ color: achievementTier(entry.stagesCompleted) }}>
-                  {getStageAchievementName(entry.stagesCompleted)}
-                </span>
                 <div className="lb-score">
-                  <b>{entry.reputationScore?.toFixed(2) || "0"}</b>
-                  <span>{getTimeAgo(entry.lastActivityAt)}</span>
+                  <b>{Number(entry.reputationScore ?? 0).toFixed(entry.reputationScore && entry.reputationScore % 1 ? 2 : 0)}</b>
+                  <span>Reputation</span>
                 </div>
               </li>
             ))}
