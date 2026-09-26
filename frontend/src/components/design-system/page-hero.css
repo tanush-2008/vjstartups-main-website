@@ -1,0 +1,33 @@
+/* Editorial page header shared by the platform pages, echoing the landing's section heads. */
+.ph{position:relative;overflow:hidden;border-bottom:1px solid hsl(var(--border));background:hsl(var(--background))}
+.ph:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 12% 0%,rgba(215,255,99,.07),transparent 42%)}
+.ph-ghost{position:absolute;right:-2vw;bottom:-4vw;color:rgba(247,245,239,.028);font-size:clamp(140px,22vw,360px);font-weight:800;line-height:.7;letter-spacing:-.12em;text-transform:uppercase;white-space:nowrap;pointer-events:none;user-select:none}
+.ph-inner{position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:clamp(56px,8vw,112px) 7vw clamp(40px,5vw,64px)}
+
+.ph-meta{display:flex;justify-content:space-between;gap:24px;color:hsl(var(--muted-foreground));font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.ph-eyebrow{display:inline-flex;align-items:center;gap:10px;color:var(--white)}
+.ph-eyebrow:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--lime)}
+.ph-back{color:var(--white);text-decoration:none;transition:color .2s}
+.ph-back:hover{color:var(--lime)}
+
+.ph .ph-title{margin:28px 0 0;color:var(--white);font-size:clamp(52px,8.2vw,136px);font-weight:800;line-height:.84;letter-spacing:-.085em;text-transform:uppercase;overflow-wrap:anywhere}
+.ph-title em{font-style:normal;color:var(--lime)}
+
+.ph-foot{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:32px;margin-top:36px}
+.ph-desc{max-width:460px;margin:0;color:hsl(var(--muted-foreground));font-size:14px;line-height:1.55}
+.ph-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:12px}
+
+.ph-stats{display:flex;flex-wrap:wrap;margin:48px 0 0;border-top:1px solid hsl(var(--border))}
+.ph-stats>div{flex:1 1 180px;padding:18px 24px 0 0}
+.ph-stats dt{display:flex;gap:10px;color:hsl(var(--muted-foreground));font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.ph-stats dt span{color:var(--lime)}
+.ph-stats dd{margin:8px 0 0;color:var(--white);font-size:clamp(28px,3.4vw,48px);font-weight:800;line-height:1;letter-spacing:-.06em}
+.ph-extra{margin-top:32px}
+
+@media(max-width:700px){
+  .ph-inner{padding:48px 18px 36px}
+  .ph-meta span:last-child{display:none}
+  .ph-foot{grid-template-columns:1fr}
+  .ph-actions{justify-content:flex-start}
+  .ph-stats>div{flex-basis:45%}
+}
