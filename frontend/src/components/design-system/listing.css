@@ -178,3 +178,26 @@
   .ss-feature .lx-card-media{min-height:0;aspect-ratio:16/10}
   .ss-feature-wins{grid-template-columns:1fr}
 }
+
+/* Activity log (/changes): stage unlocks grouped by day. */
+.cg{display:grid;gap:44px}
+.cg-day{display:grid;grid-template-columns:minmax(140px,220px) minmax(0,1fr);gap:clamp(20px,3vw,48px);padding-top:24px;border-top:1px solid rgba(247,245,239,.1)}
+.lx .cg-day h2{position:sticky;top:calc(var(--sc-nav-h,76px) + 20px);align-self:start;margin:0;color:hsl(var(--muted-foreground));font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.cg-day ol{display:grid;margin:0;padding:0;list-style:none}
+.cg-day li+li{border-top:1px solid rgba(247,245,239,.07)}
+.cg-day li>a,.cg-day li>div{display:grid;grid-template-columns:40px minmax(0,1fr) auto 64px;align-items:center;gap:16px;padding:16px 12px;margin:0 -12px;border-radius:14px;color:var(--white);text-decoration:none;transition:background .25s}
+.cg-day li>a:hover{background:rgba(247,245,239,.04)}
+.cg-day img,.cg-day i{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.cg-day i{display:grid;place-items:center;background:#1c1c1a;color:var(--tier);font:800 13px var(--sans);font-style:normal}
+.cg-day b{display:block;font-size:15px}
+.cg-day small{display:block;overflow:hidden;color:hsl(var(--muted-foreground));font-size:13px;text-overflow:ellipsis;white-space:nowrap}
+.cg-stage{display:inline-flex;align-items:center;gap:8px;color:var(--white);font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.cg-stage:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--tier)}
+.cg-day em{color:hsl(var(--muted-foreground));font:10px var(--mono);font-style:normal;letter-spacing:.1em;text-align:right}
+.lx-empty .lx-cta{display:flex;width:max-content;margin:24px auto 0}
+@media(max-width:760px){
+  .cg-day{grid-template-columns:1fr;gap:8px}
+  .lx .cg-day h2{position:static}
+  .cg-day li>a,.cg-day li>div{grid-template-columns:40px minmax(0,1fr) auto}
+  .cg-stage{grid-column:2;grid-row:2}
+}

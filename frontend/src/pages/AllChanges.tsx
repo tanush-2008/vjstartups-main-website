@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { PageHero } from "@/components/design-system/PageHero";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Timer, ArrowRight } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import type { CSSProperties } from "react";
+import "@/components/design-system/listing.css";
 import { generateIdeaSlug } from "@/utils/slugUtils";
 
 interface ChangeItem {
@@ -84,82 +83,76 @@ const AllChanges = () => {
     fetchAllChanges();
   }, []);
 
+  const TIER: Record<ChangeItem["stageType"], string> = { problem: "var(--pink)", idea: "var(--lime)", startup: "var(--violet)" };
+  const dayLabel = (iso: string) => {
+    const d = new Date(iso);
+    const today = new Date();
+    const yesterday = new Date(today.getTime() - 86400000);
+    if (d.toDateString() === today.toDateString()) return "Today";
+    if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
+    return d.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  };
+  const groups = changes.reduce<{ day: string; items: ChangeItem[] }[]>((acc, change) => {
+    const day = dayLabel(change.createdAt);
+    const last = acc[acc.length - 1];
+    if (last && last.day === day) last.items.push(change);
+    else acc.push({ day, items: [change] });
+    return acc;
+  }, []);
+  const initials = (name: string) => name.split(/\s+/).filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+
   return (
-    <div className="page-shell">
+    <div className="page-shell lx" style={{ "--lx-accent": "var(--lime)" } as CSSProperties}>
       <PageHero
         eyebrow="Idea activity"
         title="Progress of Ideas"
         description="The complete history of idea stage unlocks across the platform."
         backLink={{ label: "Home", to: "/" }}
+        stats={loading ? undefined : [
+          { value: String(changes.length), label: changes.length === 1 ? "Stage unlock" : "Stage unlocks" },
+          { value: String(new Set(changes.map((c) => c.userName)).size), label: "Builders" },
+        ]}
       />
-      <div className="form-shell">
-        <Card className="p-6 md:p-8">
-
-          {loading ? (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading all changes...</div>
-          ) : changes.length === 0 ? (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400">No stage changes available yet.</div>
-          ) : (
-            <div className="space-y-3">
-              {changes.map((change) => {
-                const ideaSlug = change.ideaId
-                  ? generateIdeaSlug(change.ideaTitle || "idea", change.ideaId)
-                  : null;
-
-                const row = (
-                  <div className={`flex items-center gap-3 p-4 rounded-lg ${
-                    ideaSlug
-                      ? "bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-                      : "bg-gray-50 dark:bg-gray-800"
-                  }`}>
-                    <img
-                      src={change.userAvatar || `https://ui-avatars.com/api/?name=${change.userName}&size=40`}
-                      alt={change.userName}
-                      className="w-10 h-10 rounded-full"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {change.userName}
-                      </div>
-                      <div className="text-xs text-gray-700 dark:text-gray-300 truncate">
-                        Idea: {change.ideaTitle || "Journey Progress"}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Completed "{change.stageName}" • {getTimeAgo(change.createdAt)}
-                      </div>
-                    </div>
-                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      change.stageType === "problem"
-                        ? "bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300"
-                        : change.stageType === "idea"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
-                        : "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300"
-                    }`}>
-                      {change.stageType}
-                    </div>
-                    {ideaSlug && <ArrowRight className="w-4 h-4 text-gray-400" />}
-                  </div>
-                );
-
-                if (!ideaSlug) {
-                  return <div key={change.id || change._id}>{row}</div>;
-                }
-
-                return (
-                  <Link
-                    key={change.id || change._id}
-                    to={`/ideas/${ideaSlug}`}
-                    onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "auto" })}
-                    className="block"
-                  >
-                    {row}
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </Card>
-      </div>
+      <section className="lx-section">
+        {loading ? (
+          <div className="lx-loading">Loading the activity log</div>
+        ) : changes.length === 0 ? (
+          <div className="lx-empty">
+            <strong>No stage unlocks yet</strong>
+            When someone passes a stage on the startup journey, it shows up here.
+            <Link to="/journey" className="lx-cta">Start the journey ↗</Link>
+          </div>
+        ) : (
+          <div className="cg">
+            {groups.map((group) => (
+              <div key={group.day} className="cg-day">
+                <h2>{group.day}</h2>
+                <ol>
+                  {group.items.map((change) => {
+                    const ideaSlug = change.ideaId ? generateIdeaSlug(change.ideaTitle || "idea", change.ideaId) : null;
+                    const body = (
+                      <>
+                        {change.userAvatar ? <img src={change.userAvatar} alt="" /> : <i aria-hidden="true">{initials(change.userName)}</i>}
+                        <div>
+                          <b>{change.userName}</b>
+                          <small>{change.ideaTitle || "Journey progress"}</small>
+                        </div>
+                        <span className="cg-stage">{change.stageName}</span>
+                        <em>{getTimeAgo(change.createdAt)}</em>
+                      </>
+                    );
+                    return (
+                      <li key={change.id || change._id} style={{ "--tier": TIER[change.stageType] || "var(--lime)" } as CSSProperties}>
+                        {ideaSlug ? <Link to={`/ideas/${ideaSlug}`}>{body}</Link> : <div>{body}</div>}
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 };
