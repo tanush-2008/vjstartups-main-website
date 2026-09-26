@@ -409,13 +409,6 @@ export default function IdeaDetail() {
 
       <div className="page-section">
         <div className="section-container max-w-6xl">
-        {/* Back Navigation */}
-        <div className="mb-8">
-          <Link to={`/ideas#idea-${idea.ideaId}`} className="inline-flex items-center text-vj-muted hover:text-idea-primary transition-colors">
-            <ArrowLeft size={20} className="mr-2" />
-            Back to Ideas
-          </Link>
-        </div>
 
         {/* Idea Header */}
         <div className="vj-card-idea mb-8">
@@ -429,7 +422,7 @@ export default function IdeaDetail() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
             <div className="absolute top-6 left-6">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-black/70 backdrop-blur-sm rounded-full">
-                <span className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>
+                <span className="w-3 h-3 bg-green-400 rounded-full"></span>
                 <span className="text-white text-sm font-medium">Innovation Idea</span>
               </div>
             </div>
@@ -459,14 +452,7 @@ export default function IdeaDetail() {
             </div>
             <div className="absolute bottom-6 left-6 right-6">
               <div className="flex items-end justify-between">
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 font-playfair">
-                    {idea.title}
-                  </h1>
-                  <p className="text-white/90 text-lg">
-                    Stage {idea.stage}: {stageLabels[idea.stage - 1]}
-                  </p>
-                </div>
+                <div />
                 <UpvoteButton 
                   upvotes={idea.upvotes || 0} 
                   hasUpvoted={idea.upvotedBy?.includes(user?.email)}
@@ -479,11 +465,6 @@ export default function IdeaDetail() {
           {/* Meta Information */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4 text-sm text-vj-muted">
-              <div className="flex items-center gap-1">
-                <Eye size={16} />
-                <span>89 views</span>
-              </div>
-              <span>•</span>
               <div className="flex items-center gap-1">
                 <MessageCircle size={16} />
                 <span>{comments?.length || 0} comments</span>

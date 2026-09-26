@@ -207,13 +207,6 @@ export default function StartupDetail() {
 
       <div className="page-section">
         <div className="section-container max-w-6xl">
-        {/* Back Navigation */}
-        <div className="mb-8">
-          <Link to="/startups" className="inline-flex items-center text-vj-muted hover:text-startup-primary transition-colors">
-            <ArrowLeft size={20} className="mr-2" />
-            Back to Startups
-          </Link>
-        </div>
 
         {/* Startup Header */}
         <div className="vj-card-startup mb-8">
@@ -233,8 +226,8 @@ export default function StartupDetail() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
             <div className="absolute top-6 left-6">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-black/70 backdrop-blur-sm rounded-full">
-                <span className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"></span>
-                <span className="text-white text-sm font-medium">🚀 Startup</span>
+                <span className="w-3 h-3 bg-purple-400 rounded-full"></span>
+                <span className="text-white text-sm font-medium">Startup</span>
               </div>
             </div>
             <div className="absolute top-6 right-6">
@@ -252,25 +245,13 @@ export default function StartupDetail() {
                       />
                     </div>
                   )}
-                  <div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 font-playfair">
-                      {startup.startupName || startup.name}
-                    </h1>
-                    {startup.tagline && (
-                      <p className="text-white/80 text-base mb-1 italic">
-                        "{startup.tagline}"
-                      </p>
-                    )}
-                    <p className="text-white/90 text-lg">
-                      Stage {startup.stage}: {stageLabels[startup.stage - 1]}
-                    </p>
-                  </div>
+                  
                 </div>
                 <UpvoteButton 
                   upvotes={startup.upvotes}
                   hasUpvoted={hasUpvoted}
                   onClick={handleUpvote}
-                  className="bg-white/90 backdrop-blur-sm"
+                 
                 />
               </div>
             </div>

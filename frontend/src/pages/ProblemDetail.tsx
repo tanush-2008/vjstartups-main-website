@@ -220,13 +220,6 @@ const ProblemDetail = () => {
 
       <div className="page-section">
         <div className="section-container max-w-6xl">
-        {/* Back Navigation */}
-        <div className="mb-8">
-          <Link to={`/problems#problem-${problem.problemId}`} className="inline-flex items-center text-vj-muted hover:text-problem-primary transition-colors">
-            <ArrowLeft size={20} className="mr-2" />
-            Back to Problems
-          </Link>
-        </div>
 
         {/* Problem Header */}
         <div className="vj-card-problem mb-8">
@@ -241,22 +234,13 @@ const ProblemDetail = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
               <div className="absolute top-6 left-6">
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-black/70 backdrop-blur-sm rounded-full">
-                  <span className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></span>
-                  <span className="text-white text-sm font-medium">🎯 Problem Statement</span>
+                  <span className="w-3 h-3 bg-red-400 rounded-full"></span>
+                  <span className="text-white text-sm font-medium">Problem statement</span>
                 </div>
               </div>
               <div className="absolute bottom-6 left-6 right-6">
                 <div className="flex items-end justify-between">
-                  <div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 font-playfair">
-                      {problem.title}
-                    </h1>
-                    {problem.briefparagraph && (
-                      <p className="text-white/90 text-lg">
-                        {problem.briefparagraph}
-                      </p>
-                    )}
-                  </div>
+                  <div />
                   <UpvoteButton 
                     upvotes={problem.upvotes || 0}
                     hasUpvoted={problem.upvotedBy?.includes(user?.email || "")}
@@ -271,7 +255,7 @@ const ProblemDetail = () => {
                         console.error("Error upvoting problem:", err);
                       }
                     }}
-                    className="bg-white/90 backdrop-blur-sm"
+                   
                   />
                 </div>
               </div>
@@ -282,21 +266,12 @@ const ProblemDetail = () => {
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-problem-light rounded-full">
-                  <span className="w-3 h-3 bg-problem-primary rounded-full animate-pulse"></span>
-                  <span className="text-problem-primary text-sm font-medium">🎯 Problem Statement</span>
+                  <span className="w-3 h-3 bg-problem-primary rounded-full"></span>
+                  <span className="text-problem-primary text-sm font-medium">Problem statement</span>
                 </div>
               </div>
               <div className="flex items-end justify-between">
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-vj-primary mb-2 font-playfair">
-                    {problem.title}
-                  </h1>
-                  {problem.briefparagraph && (
-                    <p className="text-vj-muted text-lg">
-                      {problem.briefparagraph}
-                    </p>
-                  )}
-                </div>
+                <div />
                 <UpvoteButton 
                   upvotes={problem.upvotes || 0}
                   hasUpvoted={problem.upvotedBy?.includes(user?.email || "")}
