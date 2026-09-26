@@ -758,39 +758,88 @@ function FAQ() {
 
 const TONES:Record<string,string>={ink:"#080808",paper:"#f0eee8",pink:"#ff4aa7"};
 
+// Where the page changes colour, the incoming tone rises as a skyline of the brand mark's
+// slanted, rounded bars. Its edge travels with the incoming section's top (so there is never
+// a straight cut or a muddy in-between grey), and the bars converge to a flat edge as that
+// section reaches the top of the screen, where the base colour takes over.
+const BAR_PATTERN=[8,12,19,15,11,22].map(h=>h/22);
+
 function PageField(){
   const ref=useRef<HTMLDivElement>(null);
+  const svgRef=useRef<SVGSVGElement>(null);
+  const pathRef=useRef<SVGPathElement>(null);
   useEffect(()=>{
-    let marks:{top:number,tone:string}[]=[];
+    let edges:{top:number,to:string}[]=[];
+    let first="ink";
     const measure=()=>{
-      marks=Array.from(document.querySelectorAll<HTMLElement>("[data-tone]")).map(el=>({top:el.getBoundingClientRect().top+window.scrollY,tone:el.dataset.tone||"ink"}));
+      const marks=Array.from(document.querySelectorAll<HTMLElement>("[data-tone]"))
+        .map(el=>({top:el.getBoundingClientRect().top+window.scrollY,tone:el.dataset.tone||"ink"}))
+        .sort((a,b)=>a.top-b.top);
+      first=marks[0]?.tone??"ink";
+      edges=[];
+      let current=first;
+      marks.forEach(m=>{if(m.tone!==current){edges.push({top:m.top,to:m.tone});current=m.tone;}});
     };
-    let raf=0,applied="";
+    const SLANT=Math.tan(15*Math.PI/180);
+    let raf=0,appliedBase="",appliedFill="",hidden=false;
     const schedule=()=>{if(!raf)raf=requestAnimationFrame(tick)};
     const remeasure=()=>{measure();schedule()};
     const tick=()=>{
       raf=0;
-      if(marks.length&&ref.current){
-        const focus=window.scrollY+window.innerHeight*.5;
-        const w=window.innerHeight*.6;
-        let color=TONES[marks[0].tone];
-        for(let i=1;i<marks.length;i++){
-          const t=ease(band(focus,marks[i].top-w/2,marks[i].top+w/2));
-          if(t===0)break;
-          color=t===1?TONES[marks[i].tone]:mixHex(TONES[marks[i-1].tone],TONES[marks[i].tone],t);
-          if(t<1)break;
-        }
-        if(color!==applied){ref.current.style.backgroundColor=color;applied=color;}
+      const field=ref.current,svg=svgRef.current,path=pathRef.current;
+      if(!field||!svg||!path)return;
+      const y=window.scrollY,vh=window.innerHeight,vw=window.innerWidth;
+      const amp=Math.min(vh*.28,240);
+      let base=first,next:{top:number,to:string}|null=null,index=0;
+      for(let i=0;i<edges.length;i++){
+        if(edges[i].top<=y)base=edges[i].to;
+        else{if(edges[i].top-y<vh+amp){next=edges[i];index=i;}break;}
       }
+      const color=TONES[base];
+      if(color!==appliedBase){field.style.backgroundColor=color;appliedBase=color;}
+      if(!next){if(!hidden){svg.style.visibility="hidden";hidden=true;}return;}
+      if(hidden){svg.style.visibility="visible";hidden=false;}
+      const fill=TONES[next.to];
+      if(fill!==appliedFill){path.setAttribute("fill",fill);appliedFill=fill;}
+      svg.setAttribute("viewBox",`0 0 ${vw} ${vh}`);
+      // One outline for the whole skyline: every bar shares its slanted sides with its
+      // neighbours, so there are no seams. Bars lean like the logo's (tops to the right):
+      // column k's boundary at height Y sits at x = (k-1)*w + SLANT*(vh - Y) - SLANT*(vh + amp).
+      const edge=next.top-y;
+      const spread=Math.min(Math.max(edge/(vh*.7),0),1);
+      // Thin bars read as a signal rather than blobs; their caps round off only while the edge
+      // is moving and flatten to a clean line as the section docks.
+      const w=Math.min(Math.max(vw*.0135,16),30),r=(w/2)*spread;
+      const count=Math.ceil((vw+SLANT*(vh+amp))/w)+2;
+      const x=(k:number,Y:number)=>(k-1)*w+SLANT*(vh-Y)-SLANT*(vh+amp);
+      // The logo's six-bar rhythm under a slow envelope, so it reads as one signal, not a pattern.
+      const top=(i:number)=>{
+        const envelope=.45+.55*(.5+.5*Math.sin(i*.19+index*1.7));
+        return edge-amp*BAR_PATTERN[(i+index*2)%BAR_PATTERN.length]*envelope*spread;
+      };
+      let d=`M${x(0,vh+10).toFixed(1)} ${vh+10} L${x(0,top(0)+r).toFixed(1)} ${(top(0)+r).toFixed(1)}`;
+      for(let i=0;i<count;i++){
+        const T=top(i)+r;
+        d+=r>.5
+          ?` L${x(i,T).toFixed(1)} ${T.toFixed(1)} A${(w/2).toFixed(1)} ${r.toFixed(1)} 0 0 1 ${x(i+1,T).toFixed(1)} ${T.toFixed(1)}`
+          :` L${x(i,T).toFixed(1)} ${T.toFixed(1)} L${x(i+1,T).toFixed(1)} ${T.toFixed(1)}`;
+        const N=i+1<count?top(i+1)+r:vh+10;
+        d+=` L${x(i+1,N).toFixed(1)} ${N.toFixed(1)}`;
+      }
+      d+=" Z";
+      path.setAttribute("d",d);
     };
     remeasure();
     document.fonts?.ready.then(remeasure);
     const ro=new ResizeObserver(remeasure);
     ro.observe(document.body);
     window.addEventListener("scroll",schedule,{passive:true});
-    return()=>{ro.disconnect();window.removeEventListener("scroll",schedule);cancelAnimationFrame(raf)};
+    window.addEventListener("resize",schedule);
+    return()=>{ro.disconnect();window.removeEventListener("scroll",schedule);window.removeEventListener("resize",schedule);cancelAnimationFrame(raf)};
   },[]);
-  return <div className="page-field" ref={ref} aria-hidden="true"/>;
+  return <div className="page-field" ref={ref} aria-hidden="true">
+    <svg className="page-field-bars" ref={svgRef} preserveAspectRatio="none"><path ref={pathRef}/></svg>
+  </div>;
 }
 
 export default function Landing(){
