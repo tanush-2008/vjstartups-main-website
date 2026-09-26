@@ -41,17 +41,17 @@ export function JoinClubSection({ onMeetTeam }: JoinClubSectionProps) {
           <h2>Join VJ Startups Club</h2>
         </div>
 
-        <div className="cl-pair">
-          <div className="cl-field">
+        <div className="lx-pair">
+          <div className="lx-field">
             <h3>Why join us</h3>
-            <ul className="cl-list">
+            <ul className="lx-list">
               {benefits.map((benefit) => <li key={benefit}>{benefit}</li>)}
             </ul>
           </div>
 
-          <div className="cl-field">
+          <div className="lx-field">
             <h3>How to join</h3>
-            <ol className="cl-steps">
+            <ol className="lx-steps">
               {steps.map((step, index) => (
                 <li key={step.title}>
                   <span>{String(index + 1).padStart(2, "0")}</span>

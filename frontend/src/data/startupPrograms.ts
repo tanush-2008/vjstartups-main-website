@@ -565,9 +565,3 @@ export const getProgramsByCategory = (category: StartupProgram['category']): Sta
   return startupPrograms.filter(program => program.category === category);
 };
 
-// Success stories helper functions (to be used with successStories.ts)
-export const getSuccessStoriesByProgram = (programId: string) => {
-  // This will be implemented in successStories.ts
-  // Placeholder for consistency
-  return [];
-};

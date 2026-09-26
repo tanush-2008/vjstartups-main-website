@@ -136,4 +136,22 @@
 .lx-card-status b.is-active:before{background:var(--lime)}
 .lx-card-status b.is-planned:before{background:var(--violet)}
 .lx-gate-actions{display:flex;flex-wrap:wrap;align-items:center;gap:22px}
-.lx-block~.lx-gate{margin-top:110px}
+.lx-block~.lx-gate,.lx-grid~.lx-gate,.lx-empty~.lx-gate{margin-top:110px}
+
+/* Editorial text blocks shared by the club and story pages */
+.lx .lx-lead{max-width:1120px;margin:36px 0 0;color:var(--white);font-size:clamp(22px,2.4vw,34px);font-weight:600;line-height:1.25;letter-spacing:-.035em}
+.lx-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 56px;margin-top:48px}
+.lx-pair>.lx-field{padding-top:20px;border-top:1px solid rgba(247,245,239,.1)}
+.lx .lx-field h3{margin:0 0 14px;color:var(--lx-accent);font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.lx-field>p{margin:0;color:rgba(247,245,239,.78);font-size:16px;line-height:1.6}
+.lx-list{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.lx-list li{position:relative;padding-left:20px;color:rgba(247,245,239,.82);font-size:15px;line-height:1.5}
+.lx-list li:before{content:"";position:absolute;left:0;top:.7em;width:8px;height:2px;background:var(--lime)}
+.lx-list.is-violet li:before{background:var(--violet)}
+.lx-steps{display:grid;margin:0;padding:0;list-style:none}
+.lx-steps li{display:flex;gap:18px;padding:16px 0;border-bottom:1px solid rgba(247,245,239,.08)}
+.lx-steps li:first-child{padding-top:0}
+.lx-steps span{padding-top:4px;color:var(--lime);font:11px var(--mono);letter-spacing:.1em}
+.lx-steps strong{display:block;color:var(--white);font-size:17px;font-weight:800;letter-spacing:-.03em}
+.lx-steps p{margin:4px 0 0;color:hsl(var(--muted-foreground));font-size:14px;line-height:1.5}
+@media(max-width:700px){.lx-pair{grid-template-columns:1fr}}

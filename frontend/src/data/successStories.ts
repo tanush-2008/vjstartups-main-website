@@ -72,7 +72,7 @@ export const successStories: SuccessStory[] = [
         name: 'Veda Nampally',
         branch: 'Computer Science - CSBS',
         year: '2nd',
-        imageUrl: '/src/assets/veda_nampally.png',
+        imageUrl: '/success-stories/veda_nampally.png',
         socialLinks: [
           {
             platform: 'linkedin',
@@ -138,7 +138,7 @@ export const successStories: SuccessStory[] = [
     gallery: [
       {
         type: 'image',
-        url: '/src/assets/veda_team.png',
+        url: '/success-stories/veda_team.png',
         caption: 'Veda with the kids during dance training session'
       },      
       {
@@ -255,4 +255,13 @@ export const getFeaturedSuccessStories = (): SuccessStory[] => {
 
 export const getSuccessStoryById = (id: string): SuccessStory | undefined => {
   return successStories.find(story => story.id === id);
+};
+
+// Dates are stored either as ISO ("2024-06-30") or as "Aug-2025". new Date() only parses the
+// second form in Chrome, so both are formatted here as "June 2024" / "Aug 2025".
+export const formatStoryDate = (date: string): string => {
+  const iso = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(date);
+  if (!iso) return date.replace(/-/g, " ");
+  const parsed = new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3] ?? 1));
+  return parsed.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 };

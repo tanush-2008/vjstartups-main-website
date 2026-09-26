@@ -7,13 +7,13 @@ export function ClubAboutSection() {
         <span>01 / About</span>
         <h2>About the club</h2>
       </div>
-      <p className="cl-lead">{clubInfo.description}</p>
-      <div className="cl-pair">
-        <div className="cl-field">
+      <p className="lx-lead">{clubInfo.description}</p>
+      <div className="lx-pair">
+        <div className="lx-field">
           <h3>Our mission</h3>
           <p>{clubInfo.mission}</p>
         </div>
-        <div className="cl-field">
+        <div className="lx-field">
           <h3>Our vision</h3>
           <p>{clubInfo.vision}</p>
         </div>

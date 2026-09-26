@@ -33,12 +33,12 @@ export function WingDetailCard({ wing, index, teamCount, onMeetTeam }: WingDetai
       </header>
 
       <div className="cl-wing-body">
-        <div className="cl-field">
+        <div className="lx-field">
           <h3>Purpose</h3>
           <p>{wing.purpose}</p>
         </div>
 
-        <div className="cl-field">
+        <div className="lx-field">
           <h3>Focus areas</h3>
           <div className="lx-tags">
             {wing.focusAreas.map((area) => (
@@ -48,19 +48,19 @@ export function WingDetailCard({ wing, index, teamCount, onMeetTeam }: WingDetai
         </div>
 
         {(wing.achievements || wing.currentProjects) && (
-          <div className="cl-pair">
+          <div className="lx-pair">
             {wing.achievements && (
-              <div className="cl-field">
+              <div className="lx-field">
                 <h3>Key achievements</h3>
-                <ul className="cl-list">
+                <ul className="lx-list">
                   {wing.achievements.map((item) => <li key={item}>{item}</li>)}
                 </ul>
               </div>
             )}
             {wing.currentProjects && (
-              <div className="cl-field">
+              <div className="lx-field">
                 <h3>Current projects</h3>
-                <ul className="cl-list is-violet">
+                <ul className="lx-list is-violet">
                   {wing.currentProjects.map((item) => <li key={item}>{item}</li>)}
                 </ul>
               </div>
@@ -89,7 +89,7 @@ export function WingDetailCard({ wing, index, teamCount, onMeetTeam }: WingDetai
                     </p>
                   )}
                   {sub.achievements && sub.achievements.length > 0 && (
-                    <ul className="cl-list">
+                    <ul className="lx-list">
                       {sub.achievements.map((item) => <li key={item}>{item}</li>)}
                     </ul>
                   )}
