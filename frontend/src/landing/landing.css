@@ -640,3 +640,52 @@ html.lenis{scroll-behavior:auto}
 .vj-landing .hero-v12-copy h1{color:#fff}
 .vj-landing .hero-v12-if i{-webkit-text-stroke-color:#fff}
 .vj-landing .hero-v12-kicker{color:rgba(255,255,255,.62)}
+
+/* --- 02 / The journey: stages that move ------------------------------------------------------ */
+.vj-landing .journey-copy{display:grid;align-content:center;gap:0}
+.vj-landing .journey-count{height:clamp(58px,6.4vw,104px);overflow:hidden;margin-bottom:18px}
+.vj-landing .journey-count span{display:block;transition:transform .9s cubic-bezier(.7,0,.2,1)}
+.vj-landing .journey-count b{display:block;height:clamp(58px,6.4vw,104px);color:transparent;font-size:clamp(58px,6.4vw,104px);font-weight:800;line-height:1;letter-spacing:-.08em;-webkit-text-stroke:1.2px var(--lime)}
+.vj-landing .journey-stage .stage-kicker{display:block;margin-bottom:14px;color:var(--pink);font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;animation:j-fade .7s cubic-bezier(.2,.7,.2,1) both}
+.vj-landing .journey-stage h2{margin:0}
+.vj-landing .journey-stage .jw{display:inline-block;overflow:hidden;margin:-.1em -.12em -.22em 0;padding:.1em .12em .22em 0;vertical-align:top}
+.vj-landing .journey-stage .jw>span{display:inline-block;animation:j-rise .85s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.05s + var(--k,0)*.06s)}
+.vj-landing .journey-stage p{max-width:420px;margin:26px 0 24px;color:rgba(255,255,255,.66);font-size:15px;line-height:1.55;animation:j-fade .8s cubic-bezier(.2,.7,.2,1) .25s both}
+.vj-landing .journey-stage>a{display:inline-flex;gap:6px;color:var(--lime);font-size:11px;font-weight:800;text-decoration:none;animation:j-fade .8s cubic-bezier(.2,.7,.2,1) .35s both}
+@keyframes j-rise{from{transform:translate3d(0,calc(var(--dir,1)*108%),0)}to{transform:none}}
+@keyframes j-fade{from{opacity:0;transform:translate3d(0,calc(var(--dir,1)*16px),0)}to{opacity:1;transform:none}}
+
+/* Each new photo is revealed upward over the last and settles slowly while its stage lasts. */
+.vj-landing .journey-image img{opacity:1;transform:scale(1.12);clip-path:inset(100% 0 0 0);transition:clip-path 1.05s cubic-bezier(.7,0,.2,1),transform 1.4s cubic-bezier(.2,.7,.2,1)}
+.vj-landing .journey-image img.is-past{clip-path:inset(0);transform:scale(1)}
+.vj-landing .journey-image img.active{clip-path:inset(0);transform:scale(calc(1.06 - var(--lp,0)*.06))}
+
+/* Progress: seven segments; the current one fills with the scroll and shows its name. */
+.vj-landing .journey-steps{position:absolute;left:7vw;right:7vw;bottom:28px;display:flex;gap:10px}
+.vj-landing .journey-steps button{display:grid;flex:1 1 0;gap:9px;min-width:0;padding:0;border:0;background:none;color:rgba(255,255,255,.5);text-align:left;cursor:pointer;transition:flex-grow .6s cubic-bezier(.2,.7,.2,1),color .3s}
+.vj-landing .journey-steps button.active{flex-grow:3.2;color:#fff}
+.vj-landing .journey-steps button.done{color:rgba(255,255,255,.72)}
+.vj-landing .journey-step-label{display:flex;gap:10px;overflow:hidden;font:9px var(--mono);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.vj-landing .journey-step-label b{font-weight:500;color:inherit}
+.vj-landing .journey-steps button.active .journey-step-label b{color:var(--lime)}
+.vj-landing .journey-step-label em{font-style:normal;opacity:0;transition:opacity .4s}
+.vj-landing .journey-steps button.active .journey-step-label em{opacity:1}
+.vj-landing .journey-step-track{position:relative;height:2px;overflow:hidden;border-radius:2px;background:rgba(255,255,255,.14)}
+.vj-landing .journey-step-track span{position:absolute;inset:0;background:var(--lime);transform:scaleX(0);transform-origin:left}
+.vj-landing .journey-steps button:hover{color:#fff}
+.vj-landing .journey-steps button:focus-visible{outline:2px solid var(--lime);outline-offset:6px}
+@media(max-width:700px){
+  .vj-landing .journey-steps{left:18px;right:18px;bottom:26px;gap:5px}
+  .vj-landing .journey-steps button.active{flex-grow:2.2}
+  .vj-landing .journey-count{height:48px;margin-bottom:10px}
+  .vj-landing .journey-count b{height:48px;font-size:48px}
+  .vj-landing .journey-stage p{font-size:13px;margin:14px 0}
+  /* The copy sits over the photo on phones: no photo caption under it, no stage names in the bar. */
+  .vj-landing .journey-image-meta{display:none}
+  .vj-landing .journey-step-label em{display:none}
+  .vj-landing .journey-steps button.active{flex-grow:1.4}
+}
+@media(prefers-reduced-motion:reduce){
+  .vj-landing .journey-stage *,.vj-landing .journey-stage .jw>span{animation:none!important}
+  .vj-landing .journey-image img{transition:none}
+}

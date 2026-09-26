@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import Lenis from "lenis";
 import { useUser } from "@/pages/UserContext";
@@ -434,11 +434,46 @@ function Starting() {
 }
 
 function Journey() {
-  const ref=useRef<HTMLElement>(null), [index,setIndex]=useState(0),[percent,setPercent]=useState(0);
-  useSectionFrame(ref,frame=>{const p=progressOf(frame);setPercent(Math.round(p*100));setIndex(Math.min(STAGES.length-1,Math.floor(p*STAGES.length)))});
+  const ref=useRef<HTMLElement>(null),[index,setIndex]=useState(0),[dir,setDir]=useState(1);
+  const fills=useRef<Array<HTMLSpanElement|null>>([]),percentRef=useRef<HTMLSpanElement>(null),last=useRef(0);
+  useSectionFrame(ref,frame=>{
+    const p=progressOf(frame);
+    const exact=p*STAGES.length;
+    const i=Math.min(STAGES.length-1,Math.floor(exact));
+    const local=Math.min(Math.max(exact-i,0),1);
+    if(i!==last.current){setDir(i>last.current?1:-1);last.current=i;setIndex(i);}
+    // Continuous progress, written directly (no re-render per frame).
+    ref.current?.style.setProperty("--lp",local.toFixed(3));
+    fills.current.forEach((fill,k)=>{if(fill)fill.style.transform=`scaleX(${k<i?1:k>i?0:local})`;});
+    if(percentRef.current)percentRef.current.textContent=`${Math.round(p*100)}%`;
+  });
   const go=(i:number)=>{const el=ref.current;if(!el)return;const top=el.getBoundingClientRect().top+window.scrollY;const travel=el.offsetHeight-window.innerHeight;window.scrollTo({top:top+travel*((i+.5)/STAGES.length),behavior:"smooth"})};
   const s=STAGES[index];
-  return <section className="journey" data-tone="ink" id="journey" ref={ref}><div className="journey-sticky"><div className="journey-top"><span>02 / THE JOURNEY</span><span>{s[0]} / 07</span></div><div className="journey-copy"><span className="stage-kicker">{s[1]}</span><span className="stage-number">{s[0]}</span><h2>{s[2]}</h2><p>{s[3]}</p><Link to="/journey">Open your journey <Arrow/></Link></div><div className="journey-image">{STAGES.map((x,i)=><img key={x[0]} src={x[4]} alt="" className={i===index?"active":""} loading="lazy" decoding="async"/>) }<div className="journey-shade"/><div className="journey-image-meta"><span>VIRTUAL STARTUP JOURNEY</span><span>{percent}%</span></div></div><div className="journey-dots">{STAGES.map((x,i)=><button key={x[0]} className={i===index?"active":""} onClick={()=>go(i)}>{x[0]}<i/></button>)}</div></div></section>;
+  return <section className="journey" data-tone="ink" id="journey" ref={ref} style={{"--dir":dir} as CSSProperties}>
+    <div className="journey-sticky">
+      <div className="journey-top"><span>02 / THE JOURNEY</span><span>07 STAGES</span></div>
+      <div className="journey-copy">
+        <div className="journey-count" aria-hidden="true"><span style={{transform:`translate3d(0,${(-index/STAGES.length)*100}%,0)`}}>{STAGES.map(x=><b key={x[0]}>{x[0]}</b>)}</span></div>
+        <div className="journey-stage" key={index}>
+          <span className="stage-kicker">{s[1]}</span>
+          <h2 aria-label={s[2]}>{s[2].split(" ").map((word,k)=><Fragment key={k}>{word.split(/(?<=-)/).map((part,j)=><span key={j} className="jw" aria-hidden="true"><span style={{"--k":k} as CSSProperties}>{part}</span></span>)}{" "}</Fragment>)}</h2>
+          <p>{s[3]}</p>
+          <Link to="/journey">Open your journey <Arrow/></Link>
+        </div>
+      </div>
+      <div className="journey-image">
+        {STAGES.map((x,i)=><img key={x[0]} src={x[4]} alt="" className={i<index?"is-past":i===index?"active":""} loading="lazy" decoding="async"/>)}
+        <div className="journey-shade"/>
+        <div className="journey-image-meta"><span>VIRTUAL STARTUP JOURNEY / {s[0]}</span><span ref={percentRef}>0%</span></div>
+      </div>
+      <div className="journey-steps" role="tablist" aria-label="Journey stages">
+        {STAGES.map((x,i)=><button key={x[0]} role="tab" aria-selected={i===index} className={i===index?"active":i<index?"done":""} onClick={()=>go(i)}>
+          <span className="journey-step-label"><b>{x[0]}</b><em>{x[1]}</em></span>
+          <span className="journey-step-track"><span ref={n=>{fills.current[i]=n}}/></span>
+        </button>)}
+      </div>
+    </div>
+  </section>;
 }
 
 function Sphere() {
